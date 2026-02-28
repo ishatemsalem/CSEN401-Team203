@@ -18,6 +18,10 @@ We're mainly using the [Github Desktop app](https://desktop.github.com/) 3ashan 
 - Choose your exact Eclipse workspace in the Local Path (like `C:\Users\ishatemsalem\eclipse-workspace\CSEN401-Team203`). Clone it.
 - To link it in Eclipse: `File > Import > General > Existing Projects into Workspace`, select the folder, Finish.
 
+  
+- CRITICAL: Ensure JDK 21: In Eclipse, go to Window > Preferences > Java > Installed JREs. Law JDK 21 msh mawgoud, click Add > Standard VM > Directory w dawwar 3ala el folder beta3 JDK 21. Check the box gambo 3ashan yeb2a el default.
+- Bardo double-check Window > Preferences > Java > Compiler w et2akked en el "Compiler compliance level" is set to 21.
+
 ### 2. The Daily Start (Pulling)
 Awal ma tefta7 el PC te3mel keda. **Never write code without checking this first.**
 - Open GitHub Desktop and click **Fetch origin** on top.
