@@ -27,3 +27,7 @@ replay_pid*
 bin/
 .metadata/
 .recommenders/
+
+# Extras
+.project
+.classpath
