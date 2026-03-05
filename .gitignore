@@ -28,3 +28,6 @@ bin/
 .metadata/
 .recommenders/
 
+# Extras
+.project
+.classpath
