@@ -5,148 +5,128 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import game.engine.cards.ConfusionCard;
-import game.engine.cards.EnergyStealCard;
-import game.engine.cards.ShieldCard;
-import game.engine.cards.StartOverCard;
-import game.engine.cards.SwapperCard;
-import game.engine.cells.Cell;
-import game.engine.cells.ContaminationSock;
-import game.engine.cells.ConveyorBelt;
-import game.engine.cells.DoorCell;
-import game.engine.monsters.Dasher;
-import game.engine.monsters.Dynamo;
-import game.engine.monsters.Monster;
-import game.engine.monsters.MultiTasker;
-import game.engine.monsters.Schemer;
+import game.engine.exceptions.InvalidCSVFormat;
 import game.engine.Role;
-import game.engine.cards.Card;
+import game.engine.cards.*;
+import game.engine.cells.*;
+import game.engine.monsters.*;
 
 public class DataLoader {
-    private static final String CARDS_FILE_NAME = "cards.csv";
-    private static final String CELLS_FILE_NAME = "cells.csv";
-    private static final String MONSTERS_FILE_NAME = "monsters.csv";
+	private static final String CARDS_FILE_NAME = "cards.csv";
+	private static final String CELLS_FILE_NAME = "cells.csv";
+	private static final String MONSTERS_FILE_NAME = "monsters.csv";
+	
+	@SuppressWarnings("resource")
+	public static ArrayList<Card> readCards() throws IOException {
+		ArrayList<Card> cards = new ArrayList<Card>();
 
-     public static ArrayList<Card> readCards() throws IOException{
-        ArrayList<Card> cards = new ArrayList<>();
-        BufferedReader br = new BufferedReader(new FileReader(CARDS_FILE_NAME));
-        String line;
+		BufferedReader br = new BufferedReader(new FileReader(CARDS_FILE_NAME));
 
-        while((line = br.readLine()) != null){
-            String[] data = line.split(",");
+		while (br.ready()) {
+			String nextLine = br.readLine();
+			String[] data = nextLine.split(",");
+			
 
-            String type = data[0];
-            String name = data[1];
-            String description = data[2];
-            int rarity = Integer.parseInt(data[3]);
+			if (data.length != 4 && data.length != 5) {
+				System.out.println(data.length);
+				throw new InvalidCSVFormat(nextLine);
+			}
+				
+			
+			String cardType = data[0];
+			Card card;
+			
+			switch (cardType) {
+				case "SWAPPER":
+					card = new SwapperCard(data[1], data[2], Integer.parseInt(data[3])); break;
+				case "ENERGYSTEAL":
+					card = new EnergyStealCard(data[1], data[2], Integer.parseInt(data[3]), Integer.parseInt(data[4])); break;
+				case "STARTOVER":
+					card = new StartOverCard(data[1], data[2], Integer.parseInt(data[3]), Boolean.parseBoolean(data[4])); break;
+				case "SHIELD":
+					card = new ShieldCard(data[1], data[2], Integer.parseInt(data[3])); break;
+				case "CONFUSION":
+					card = new ConfusionCard(data[1], data[2], Integer.parseInt(data[3]), Integer.parseInt(data[4])); break;
+			default:
+				throw new InvalidCSVFormat("Unknown card type: " + cardType);
+			}
+			
+			cards.add(card);
+			
+		}
 
-            switch(type){
+		br.close();
 
-            case "SWAPPER":
-                cards.add(new SwapperCard(name, description, rarity));
-                break;
+		return cards;
+	}
+	
+	@SuppressWarnings("resource")
+	public static ArrayList<Cell> readCells() throws IOException {
+		ArrayList<Cell> cells = new ArrayList<Cell>();
 
-            case "SHIELD":
-                cards.add(new ShieldCard(name, description, rarity));
-                break;
+		BufferedReader br = new BufferedReader(new FileReader(CELLS_FILE_NAME));
 
-            case "ENERGYSTEAL":
-                int energy = Integer.parseInt(data[4]);
-                cards.add(new EnergyStealCard(name, description, rarity, energy));
-                break;
+		while (br.ready()) {
+			String nextLine = br.readLine();
+			String[] data = nextLine.split(",");
+			
 
-            case "STARTOVER":
-                boolean lucky = Boolean.parseBoolean(data[4]);
-                cards.add(new StartOverCard(name, description, rarity, lucky));
-                break;
+			if (data.length != 2 && data.length != 3)
+				throw new InvalidCSVFormat(nextLine);
+			
+			Cell cell;
+			
+			if (data.length == 2) 
+				cell = Integer.parseInt(data[1]) > 0 ? new ConveyorBelt(data[0], Integer.parseInt(data[1])) : new ContaminationSock(data[0], Integer.parseInt(data[1]));
+				
+			else 
+				cell = new DoorCell(data[0], Role.valueOf(data[1]), Integer.parseInt(data[2]));
+			
+			cells.add(cell);
+		}
 
-            case "CONFUSION":
-                int duration = Integer.parseInt(data[4]);
-                cards.add(new ConfusionCard(name, description, rarity, duration));
-                break;
-            }
-            
-        }
-        br.close(); 
-        return cards;
-     }
+		br.close();
 
-    public static ArrayList<Cell> readCells() throws IOException {
+		return cells;
+	}
+	
+	@SuppressWarnings("resource")
+	public static ArrayList<Monster> readMonsters() throws IOException {
+		ArrayList<Monster> monsters = new ArrayList<Monster>();
 
-        ArrayList<Cell> cells = new ArrayList<>();
-        BufferedReader br = new BufferedReader(new FileReader(CELLS_FILE_NAME));
+		BufferedReader br = new BufferedReader(new FileReader(MONSTERS_FILE_NAME));
 
-        String line;
+		while (br.ready()) {
+			String nextLine = br.readLine();
+			String[] data = nextLine.split(",");
+			
 
-        while((line = br.readLine()) != null){
+			if (data.length != 5)
+				throw new InvalidCSVFormat(nextLine);
+			
+			String monsterType = data[0];
+			Monster monster;
+			
+			switch (monsterType) {
+				case "DYNAMO":
+					monster = new Dynamo(data[1], data[2], Role.valueOf(data[3]), Integer.parseInt(data[4])); break;
+				case "DASHER":
+					monster = new Dasher(data[1], data[2], Role.valueOf(data[3]), Integer.parseInt(data[4])); break;
+				case "MULTITASKER":
+					monster = new MultiTasker(data[1], data[2], Role.valueOf(data[3]), Integer.parseInt(data[4])); break;
+				case "SCHEMER":
+					monster = new Schemer(data[1], data[2], Role.valueOf(data[3]), Integer.parseInt(data[4])); break;
+			default:
+				throw new InvalidCSVFormat("Unknown monster type: " + monsterType);
+			}
+			
+			monsters.add(monster);
+			
+		}
 
-            String[] data = line.split(",");
+		br.close();
 
-            String name = data[0];
-
-            if(data.length == 3){
-
-                Role role = Role.valueOf(data[1]);
-                int energy = Integer.parseInt(data[2]);
-
-                cells.add(new DoorCell(name, role, energy));
-            }
-
-            else if(data.length == 2){
-
-                int effect = Integer.parseInt(data[1]);
-
-                if(effect>0)
-                    cells.add(new ConveyorBelt(name,effect));
-
-                else
-                    cells.add(new ContaminationSock(name,effect));
-            }
-        }
-
-        br.close();
-        return cells;
-    }
-
-    public static ArrayList<Monster> readMonsters() throws IOException {
-
-        ArrayList<Monster> monsters = new ArrayList<>();
-        BufferedReader br = new BufferedReader(new FileReader(MONSTERS_FILE_NAME));
-
-        String line;
-
-        while((line = br.readLine()) != null){
-
-            String[] data = line.split(",");
-
-            String type = data[0];
-            String name = data[1];
-            String description = data[2];
-            Role role = Role.valueOf(data[3]);
-            int energy = Integer.parseInt(data[4]);
-
-            switch(type){
-
-                case "DASHER":
-                    monsters.add(new Dasher(name, description, role, energy));
-                    break;
-
-                case "DYNAMO":
-                    monsters.add(new Dynamo(name, description, role, energy));
-                    break;
-
-                case "MULTITASKER":
-                    monsters.add(new MultiTasker(name, description, role, energy));
-                    break;
-                case "SCHEMER":
-                    monsters.add(new Schemer(name, description, role, energy));
-                    break;
-            }
-        }
-        
-
-        br.close();
-        return monsters;
-    }
-
+		return monsters;
+	}
+	
 }
