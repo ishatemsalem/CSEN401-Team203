@@ -32,3 +32,4 @@ bin/
 .project
 .classpath
 /bin1/
+.vscode
