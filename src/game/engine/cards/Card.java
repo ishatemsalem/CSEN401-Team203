@@ -1,5 +1,7 @@
 package game.engine.cards;
 
+import game.engine.monsters.Monster;
+
 public abstract class Card {
 	private String name;
 	private String description;
@@ -30,4 +32,8 @@ public abstract class Card {
 		return lucky;
 	}
 	
+
+
+	/* el goz2 el gdeed elly feeh skeleton */
+	public abstract void performAction(Monster player, Monster opponent);
 }

@@ -1,6 +1,7 @@
 package game.engine.cards;
 
 import game.engine.interfaces.CanisterModifier;
+import game.engine.monsters.Monster;
 
 public class EnergyStealCard extends Card implements CanisterModifier {
 	private int energy;
@@ -14,4 +15,10 @@ public class EnergyStealCard extends Card implements CanisterModifier {
 		return energy;
 	}
 	
+
+	/* el goz2 el gdeed elly feeh skeleton */
+	public void performAction(Monster player, Monster opponent) {
+    }
+	public void modifyCanisterEnergy(Monster monster, int canisterValue) {
+    }
 }

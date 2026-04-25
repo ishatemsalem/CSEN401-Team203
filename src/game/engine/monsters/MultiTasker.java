@@ -18,4 +18,8 @@ public class MultiTasker extends Monster {
 		this.normalSpeedTurns = normalSpeedTurns;
 	}
 
+
+	/* el goz2 el gdeed elly feeh skeleton */
+	public void executePowerupEffect(Monster opponentMonster) {
+    }
 }
