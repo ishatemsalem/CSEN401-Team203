@@ -1,5 +1,7 @@
 package game.engine.cards;
 
+import game.engine.monsters.Monster;
+
 public class ConfusionCard extends Card {
 	private int duration;
 	
@@ -12,4 +14,8 @@ public class ConfusionCard extends Card {
 		return duration;
 	}
 
+
+	/* el goz2 el gdeed elly feeh skeleton */
+	public void performAction(Monster player, Monster opponent) {
+    }
 }

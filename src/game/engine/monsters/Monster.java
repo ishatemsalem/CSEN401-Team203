@@ -92,4 +92,25 @@ public abstract class Monster implements Comparable<Monster> {
 		return this.position - other.position;
 	}
 
+
+
+/* el goz2 el gdeed elly feeh skeleton */
+
+
+	public abstract void executePowerupEffect(Monster opponentMonster);
+
+	public boolean isConfused() {
+		return false;
+	}
+
+	public void move(int distance) {
+	}
+
+	public void alterEnergy(int energy) {
+	}
+
+	public void decrementConfusion() {
+	}
+
+
 }

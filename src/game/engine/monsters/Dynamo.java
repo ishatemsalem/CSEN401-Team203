@@ -8,4 +8,9 @@ public class Dynamo extends Monster {
 		super(name, description, role, energy);
 	}
 	
+
+
+	/* el goz2 el gdeed elly feeh skeleton*/
+	public void executePowerupEffect(Monster opponentMonster) {
+    }
 }

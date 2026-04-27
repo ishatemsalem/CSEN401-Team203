@@ -18,4 +18,9 @@ public class Dasher extends Monster {
 		this.momentumTurns = momentumTurns;
 	}
 
+
+	/* el goz2 el gdeed elly feeh skeleton */
+	public void executePowerupEffect(Monster opponentMonster) {
+    }
+
 }

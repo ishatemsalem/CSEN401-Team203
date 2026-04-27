@@ -7,6 +7,15 @@ import java.util.Collections;
 import game.engine.dataloader.DataLoader;
 import game.engine.monsters.*;
 
+
+/* el goz2 el gdeed elly feeh skeleton, imports edition*/
+import game.engine.monsters.Monster;
+import game.engine.exceptions.OutOfEnergyException;
+import game.engine.exceptions.InvalidMoveException;
+
+
+
+
 public class Game {
 	private Board board;
 	private ArrayList<Monster> allMonsters; 
@@ -56,4 +65,34 @@ public class Game {
 	    		.orElse(null);
 	}
 	
+
+
+
+
+	/* el goz2 el gdeed elly feeh skeleton*/
+	private Monster getCurrentOpponent() {
+        return null;
+    }
+
+    private int rollDice() {
+        return 0;
+    }
+
+    public void usePowerup() throws OutOfEnergyException {
+    }
+
+    public void playTurn() throws InvalidMoveException {
+    }
+
+    private void switchTurn() {
+    }
+
+    private boolean checkWinCondition(Monster monster) {
+        return false;
+    }
+
+    public Monster getWinner() {
+        return null;
+    }
+
 }
