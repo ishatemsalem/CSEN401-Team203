@@ -32,4 +32,8 @@ public class Cell {
 
     public void onLand(Monster landingMonster, Monster opponentMonster) {
     }
+
+	public void setName(String name) {
+    this.name = name;
+}
 }
