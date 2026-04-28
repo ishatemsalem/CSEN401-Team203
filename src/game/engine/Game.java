@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+
 import game.engine.dataloader.DataLoader;
 import game.engine.monsters.*;
 
@@ -17,6 +18,14 @@ import game.engine.exceptions.InvalidMoveException;
 
 
 public class Game {
+import game.engine.exceptions.InvalidMoveException;
+
+import game.engine.exceptions.OutOfEnergyException;
+import game.engine.dataloader.DataLoader;
+import game.engine.monsters.*;
+
+public class Game{
+
 	private Board board;
 	private ArrayList<Monster> allMonsters; 
 	private Monster player;
@@ -25,12 +34,18 @@ public class Game {
 	
 	public Game(Role playerRole) throws IOException {
 		this.board = new Board(DataLoader.readCards());
-		
+
+		ArrayList<Monster> list= Board.getStationedMonsters();
+
 		this.allMonsters = DataLoader.readMonsters();
 		
 		this.player = selectRandomMonsterByRole(playerRole);
 		this.opponent = selectRandomMonsterByRole(playerRole == Role.SCARER ? Role.LAUGHER : Role.SCARER);
 		this.current = player;
+
+		list.remove(this.player);
+		list.remove(this.opponent);
+		Board.setStationedMonsters(list);
 	}
 	
 	public Board getBoard() {
@@ -64,6 +79,7 @@ public class Game {
 	    		.findFirst()
 	    		.orElse(null);
 	}
+
 	
 
 
@@ -95,4 +111,66 @@ public class Game {
         return null;
     }
 
-}
+	private Monster getCurrentOpponent(){
+		if(this.getCurrent().getRole()==this.getOpponent().getRole()){
+			return getPlayer();
+		}
+		else {
+			return getOpponent();
+		}
+				
+				
+	}
+	
+	private int rollDice() {
+		int x=(int)((Math.random()*6)+1);
+		return x;
+	}
+	public void usePowerup() throws OutOfEnergyException{
+		if(this.getCurrent().getEnergy() < Constants.POWERUP_COST) {
+			throw new OutOfEnergyException();
+		}
+		else {
+			int x=this.getCurrent().getEnergy() - Constants.POWERUP_COST;
+			this.getCurrent().setEnergy(x);
+	
+			}
+	}
+	public void playTurn() throws InvalidMoveException{
+		if(getCurrent().isFrozen()) {
+			getCurrent().setFrozen(false);
+		}
+		else {
+			int count= this.rollDice();
+			int position= this.getCurrent().getPosition();
+			int newpos= position +count;
+			this.getCurrent().setPosition(newpos);
+			}
+		this.switchTurn();
+		}
+	private void switchTurn() {
+			if(this.getPlayer().getRole()==this.getCurrent().getRole()) {
+				this.setCurrent(this.getOpponent());
+			}
+			else {
+				this.setCurrent(this.getPlayer());
+			}		
+	}
+	private boolean checkWinCondition(Monster monster) {
+		if(monster.getEnergy()== Constants.WINNING_ENERGY && monster.getPosition() >= Constants.WINNING_POSITION){
+			return true;
+		}
+		return false;
+	}
+	public Monster getWinner() {
+		if(checkWinCondition(this.getPlayer())) {
+			return this.getPlayer();
+		}
+		if(checkWinCondition(this.getOpponent())){
+			return this.getOpponent();
+		}
+		return null;
+	
+	}
+	
+		
