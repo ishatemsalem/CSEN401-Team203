@@ -81,45 +81,26 @@ public class Board {
 
 
 	//this method will be the end of me
-    public void initializeBoard(ArrayList<Cell> specialCells) {
-		int specialListPointer = 0;
-		for (int i = 0; i < 100; i++) {
-    		if (i % 2 == 0) {
-            	setCell(i, new Cell("Normal"));
-        	} else {
-            	setCell(i, specialCells.get(specialListPointer++));
-        	}
-    	}
-		// Overwrite Card Cells
-		for (int i = 0; i < Constants.CARD_CELL_INDICES.length; i++) {
-			setCell(Constants.CARD_CELL_INDICES[i], specialCells.get(specialListPointer++));
+    
+
+	private boolean contains(int[] arr, int value) { //helper method to check if an index belongs to a certain type of cell
+		if (arr == null) {
+			return false;
+		}
+		for(int i=0; i<arr.length; i++) {
+			if (arr[i] == value) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void initializeBoard(ArrayList<Cell> specialCells) {
+		if (specialCells == null) {
+			throw new IllegalArgumentException("specialCells list cannot be null");
 		}
 
-		// Overwrite Conveyor Belts
-		for (int i = 0; i < Constants.CONVEYOR_CELL_INDICES.length; i++) {
-			setCell(Constants.CONVEYOR_CELL_INDICES[i], specialCells.get(specialListPointer++));
-		}
-
-		// Overwrite Contamination Socks
-		for (int i = 0; i < Constants.SOCK_CELL_INDICES.length; i++) {
-			setCell(Constants.SOCK_CELL_INDICES[i], specialCells.get(specialListPointer++));
-		}
-
-		// Overwrite Monster Cells and assign stationed monsters
-		
-		
-		for (int i = 0; i < Constants.MONSTER_CELL_INDICES.length; i++) {
-			specialListPointer++; // skip the placeholder MonsterCell from CSV
-			Monster monster = getStationedMonsters().get(i);
-			monster.move(Constants.MONSTER_CELL_INDICES[i]); // set monster's position
-			MonsterCell mCell = new MonsterCell(monster.getName(), monster); // name synced automatically
-			setCell(Constants.MONSTER_CELL_INDICES[i], mCell);
-		}
-    }
-
-
-	public void initializeBoard2(ArrayList<Cell> specialCells) {
-		//Separate the CSV-loaded cells by type
+		// Separate the CSV-loaded cells by type
 		ArrayList<DoorCell> doorCells = new ArrayList<>();
 		ArrayList<ConveyorBelt> conveyorBelts = new ArrayList<>();
 		ArrayList<ContaminationSock> contaminationSocks = new ArrayList<>();
@@ -134,39 +115,67 @@ public class Board {
 			}
 		}
 
-		// Step 1: Base layer — even → Normal, odd → DoorCell
 		int doorIndex = 0;
+		int conveyorIndex = 0;
+		int sockIndex = 0;
+		int monsterIndex = 0;
+
+		Cell cellToPlace = null;
+
 		for (int i = 0; i < Constants.BOARD_SIZE; i++) {
+
 			if (i % 2 == 0) {
-				setCell(i, new Cell("Normal Cell " + i));
+
+				if (doorIndex < doorCells.size()) {
+					cellToPlace = doorCells.get(doorIndex++);
+				} else {
+					cellToPlace = new Cell("Normal Rest Cell " + i);
+				}
+
 			} else {
-				setCell(i, doorCells.get(doorIndex++));
+
+				if (contains(Constants.CARD_CELL_INDICES, i)) {
+
+					cellToPlace = new Cell("Card Cell " + i);
+
+				} else if (contains(Constants.CONVEYOR_CELL_INDICES, i)) {
+
+					if (conveyorIndex < conveyorBelts.size()) {
+						cellToPlace = conveyorBelts.get(conveyorIndex++);
+					} else {
+						cellToPlace = new Cell("Normal Rest Cell " + i);
+					}
+
+				} else if (contains(Constants.SOCK_CELL_INDICES, i)) {
+
+					if (sockIndex < contaminationSocks.size()) {
+						cellToPlace = contaminationSocks.get(sockIndex++);
+					} else {
+						cellToPlace = new Cell("Normal Rest Cell " + i);
+					}
+
+				} else if (contains(Constants.MONSTER_CELL_INDICES, i)) {
+
+					if (monsterIndex < stationedMonsters.size()) {
+						Monster stationedMonster = stationedMonsters.get(monsterIndex++);
+						stationedMonster.setPosition(i);
+						cellToPlace = new MonsterCell(
+							stationedMonster.getName(),
+							stationedMonster
+						);
+					} else {
+						cellToPlace = new Cell("Normal Rest Cell" + i);
+					}
+
+				} else {
+					cellToPlace = new Cell("Normal Rest Cell" + i);
+				}
 			}
-		}
 
-		// Step 2: Override with CardCells at their designated indices
-		for (int index : Constants.CARD_CELL_INDICES) {
-			setCell(index, new CardCell("Card Cell " + index));
+			setCell(i, cellToPlace);
 		}
-
-		// Step 3: Override with ConveyorBelts at their designated indices
-		for (int i = 0; i < Constants.CONVEYOR_CELL_INDICES.length; i++) {
-			setCell(Constants.CONVEYOR_CELL_INDICES[i], conveyorBelts.get(i));
-		}
-
-		// Step 4: Override with ContaminationSocks at their designated indices
-		for (int i = 0; i < Constants.SOCK_CELL_INDICES.length; i++) {
-			setCell(Constants.SOCK_CELL_INDICES[i], contaminationSocks.get(i));
-		}
-
-		// Step 5: Override with MonsterCells, assigning each stationed monster its position
-		for (int i = 0; i < Constants.MONSTER_CELL_INDICES.length; i++) {
-			int cellIndex = Constants.MONSTER_CELL_INDICES[i];
-			Monster stationedMonster = stationedMonsters.get(i);
-			stationedMonster.setPosition(cellIndex);
-			setCell(cellIndex, new MonsterCell("Monster Cell " + cellIndex, stationedMonster));
-		}
-	}
+	}	
+	
 
     private void setCardsByRarity() {
 		ArrayList<Card> expandedList = new ArrayList<>();
