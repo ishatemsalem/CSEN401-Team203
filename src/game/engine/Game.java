@@ -14,16 +14,6 @@ import game.engine.monsters.Monster;
 import game.engine.exceptions.OutOfEnergyException;
 import game.engine.exceptions.InvalidMoveException;
 
-
-
-
-public class Game {
-import game.engine.exceptions.InvalidMoveException;
-
-import game.engine.exceptions.OutOfEnergyException;
-import game.engine.dataloader.DataLoader;
-import game.engine.monsters.*;
-
 public class Game{
 
 	private Board board;
@@ -88,30 +78,6 @@ public class Game{
 
 
 	/* el goz2 el gdeed elly feeh skeleton*/
-	private Monster getCurrentOpponent() {
-        return null;
-    }
-
-    private int rollDice() {
-        return 0;
-    }
-
-    public void usePowerup() throws OutOfEnergyException {
-    }
-
-    public void playTurn() throws InvalidMoveException {
-    }
-
-    private void switchTurn() {
-    }
-
-    private boolean checkWinCondition(Monster monster) {
-        return false;
-    }
-
-    public Monster getWinner() {
-        return null;
-    }
 
 	private Monster getCurrentOpponent(){
 		if(this.getCurrent().getRole()==this.getOpponent().getRole()){
