@@ -10,6 +10,12 @@ public class StartOverCard extends Card {
 
 
 	/* el goz2 el gdeed elly feeh skeleton*/
-	public void performAction(Monster player, Monster opponent) {
+	@Override
+    public void performAction(Monster player, Monster opponent) {
+        if (isLucky()) {
+            opponent.setPosition(0);
+        } else {
+            player.setPosition(0);
+        }
     }
 }

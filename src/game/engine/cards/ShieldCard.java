@@ -10,6 +10,9 @@ public class ShieldCard extends Card {
 
 
 	/* el goz2 el gdeed elly feeh skeleton */
-	public void performAction(Monster player, Monster opponent) {
+@Override
+    public void performAction(Monster player, Monster opponent) {
+        player.setShielded(true);
+        opponent.setShielded(false);
     }
 }

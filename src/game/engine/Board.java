@@ -29,6 +29,10 @@ public class Board {
 		stationedMonsters = new ArrayList<Monster>();
 		originalCards = readCards;
 		cards = new ArrayList<Card>();
+
+		/* */
+		setCardsByRarity();
+        reloadCards();
 	}
 	
 	public Cell[][] getBoardCells() {
@@ -82,7 +86,30 @@ public class Board {
         return null;
     }
 
-    public void moveMonster(Monster currentMonster, int roll, Monster opponentMonster) throws InvalidMoveException {
+public void moveMonster(Monster currentMonster, int roll, Monster opponentMonster) throws InvalidMoveException {
+        int originalPosition = currentMonster.getPosition();
+        
+        currentMonster.move(roll);
+
+        Cell landedCell = getCell(currentMonster.getPosition());
+        if (landedCell != null) {
+            landedCell.onLand(currentMonster, opponentMonster);
+        }
+
+// exception if collission
+        if (currentMonster.getPosition() == opponentMonster.getPosition() && currentMonster.getPosition() != 0) {
+            currentMonster.setPosition(originalPosition);
+            throw new InvalidMoveException("Invalid move: Cannot land on the opponent's cell.");
+        }
+
+        if (currentMonster.isConfused()) {
+            currentMonster.decrementConfusion();
+        }
+        if (opponentMonster.isConfused()) {
+            opponentMonster.decrementConfusion();
+        }
+
+        updateMonsterPositions(currentMonster, opponentMonster);
     }
 
     private void updateMonsterPositions(Monster player, Monster opponent) {

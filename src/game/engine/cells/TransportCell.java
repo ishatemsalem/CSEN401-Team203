@@ -18,5 +18,12 @@ public abstract class TransportCell extends Cell {
 
 	/* el goz2 el gdeed elly feeh skeleton */
 	public void transport(Monster monster) {
+        monster.move(this.getEffect());
+    }
+
+    @Override
+    public void onLand(Monster landingMonster, Monster opponentMonster) {
+        super.onLand(landingMonster, opponentMonster);
+        transport(landingMonster); 
     }
 }

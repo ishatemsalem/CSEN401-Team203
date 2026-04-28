@@ -17,8 +17,25 @@ public class EnergyStealCard extends Card implements CanisterModifier {
 	
 
 	/* el goz2 el gdeed elly feeh skeleton */
-	public void performAction(Monster player, Monster opponent) {
+@Override
+    public void performAction(Monster player, Monster opponent) {
+        int stolen = Math.min(this.getEnergy(), opponent.getEnergy());
+
+        if (opponent.isShielded()) {
+            opponent.setShielded(false);
+            stolen = 0;
+        } else {
+            opponent.setEnergy(opponent.getEnergy() - stolen);
+        }
+
+        player.setEnergy(player.getEnergy() + stolen);
+
+        modifyCanisterEnergy(player, stolen);
+        modifyCanisterEnergy(opponent, -stolen);
     }
-	public void modifyCanisterEnergy(Monster monster, int canisterValue) {
+
+    @Override
+    public void modifyCanisterEnergy(Monster monster, int canisterValue) {
+        monster.setEnergy(monster.getEnergy() + canisterValue);
     }
 }

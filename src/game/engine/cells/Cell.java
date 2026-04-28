@@ -27,9 +27,10 @@ public class Cell {
 
 	/* el goz2 el gdeed elly feeh skeleton */
 	public boolean isOccupied() {
-        return false;
+        return this.monster != null;
     }
 
     public void onLand(Monster landingMonster, Monster opponentMonster) {
+        setMonster(landingMonster);
     }
 }

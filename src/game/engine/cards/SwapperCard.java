@@ -10,6 +10,11 @@ public class SwapperCard extends Card {
 	
 
 	/* el goz2 el gdeed elly feeh skeleton */
-	public void performAction(Monster player, Monster opponent) {
+    public void performAction(Monster player, Monster opponent) {
+        if (player.getPosition() < opponent.getPosition()) {
+            int temp = player.getPosition();
+            player.setPosition(opponent.getPosition());
+            opponent.setPosition(temp);
+        }
     }
 }
