@@ -46,6 +46,8 @@ public class Game{
 		list.remove(this.player);
 		list.remove(this.opponent);
 		Board.setStationedMonsters(list);
+		ArrayList<Cell> specialCells = DataLoader.readCells();
+		initializeBoard(specialCells);
 	}
 	
 	public Board getBoard() {
@@ -169,6 +171,7 @@ public class Game{
 		if(checkWinCondition(this.getOpponent())){
 			return this.getOpponent();
 		}
+
 		return null;
 	
 	}
