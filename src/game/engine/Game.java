@@ -4,15 +4,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-
+import game.engine.cells.Cell;
 import game.engine.dataloader.DataLoader;
-import game.engine.monsters.*;
-
-
+import game.engine.exceptions.InvalidMoveException;
+import game.engine.exceptions.OutOfEnergyException;
 /* el goz2 el gdeed elly feeh skeleton, imports edition*/
 import game.engine.monsters.Monster;
-import game.engine.exceptions.OutOfEnergyException;
-import game.engine.exceptions.InvalidMoveException;
 
 public class Game{
 
@@ -37,7 +34,8 @@ public class Game{
 		list.remove(this.opponent);
 		Board.setStationedMonsters(list);
 		ArrayList<Cell> specialCells = DataLoader.readCells();
-		initializeBoard(specialCells);
+		
+		this.getBoard().initializeBoard(specialCells);
 	}
 	
 	public Board getBoard() {
@@ -79,15 +77,12 @@ public class Game{
 
 	/* el goz2 el gdeed elly feeh skeleton*/
 
-	private Monster getCurrentOpponent(){
-		if(this.getCurrent().getRole()==this.getOpponent().getRole()){
-			return getPlayer();
-		}
-		else {
-			return getOpponent();
-		}
-				
-				
+private Monster getCurrentOpponent() {
+		if (this.getCurrent() == this.getPlayer()) {
+			return this.getOpponent();
+		} else {
+			return this.getPlayer();
+		}		
 	}
 	
 	private int rollDice() {
@@ -101,31 +96,30 @@ public class Game{
 		else {
 			int x=this.getCurrent().getEnergy() - Constants.POWERUP_COST;
 			this.getCurrent().setEnergy(x);
-	
+			this.getCurrent().executePowerupEffect(this.getCurrentOpponent());
 			}
 	}
 	public void playTurn() throws InvalidMoveException{
 		if(getCurrent().isFrozen()) {
 			getCurrent().setFrozen(false);
+			this.switchTurn();
 		}
 		else {
 			int count= this.rollDice();
-			int position= this.getCurrent().getPosition();
-			int newpos= position +count;
-			this.getCurrent().setPosition(newpos);
+			this.getBoard().moveMonster(this.getCurrent(), count, this.getCurrentOpponent());
+			this.switchTurn();
 			}
 		this.switchTurn();
 		}
 	private void switchTurn() {
-			if(this.getPlayer().getRole()==this.getCurrent().getRole()) {
-				this.setCurrent(this.getOpponent());
-			}
-			else {
-				this.setCurrent(this.getPlayer());
-			}		
+		if (this.getCurrent().getRole() == this.getPlayer().getRole()) {
+			this.setCurrent(this.getOpponent());
+		} else {
+			this.setCurrent(this.getPlayer());
+		}		
 	}
 	private boolean checkWinCondition(Monster monster) {
-		if(monster.getEnergy()== Constants.WINNING_ENERGY && monster.getPosition() >= Constants.WINNING_POSITION){
+		if(monster.getEnergy()>= Constants.WINNING_ENERGY && monster.getPosition() == Constants.WINNING_POSITION){
 			return true;
 		}
 		return false;
