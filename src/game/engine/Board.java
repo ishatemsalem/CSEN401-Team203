@@ -238,6 +238,14 @@ public void moveMonster(Monster currentMonster, int roll, Monster opponentMonste
                 boardCells[i][j].setMonster(null);
             }
         }
+		if(stationedMonsters != null) {
+		for (Monster m : stationedMonsters) {
+			Cell c = getCell(m.getPosition());
+			if (c!= null) {
+				c.setMonster(m);
+			}
+		}
+	}
 
         getCell(player.getPosition()).setMonster(player);
         getCell(opponent.getPosition()).setMonster(opponent);
