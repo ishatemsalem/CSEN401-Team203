@@ -133,21 +133,21 @@ public class Board {
 				if (doorIndex < doorCells.size()) {
 					cellToPlace = doorCells.get(doorIndex++);
 				} else {
-					cellToPlace = new Cell("Normal Rest Cell " + i);
+					cellToPlace = new Cell("Normal Rest Cell");
 				}
 
 			} else {
 
 				if (contains(Constants.CARD_CELL_INDICES, i)) {
 
-					cellToPlace = new Cell("Card Cell " + i);
+					cellToPlace = new CardCell("Card Cell");
 
 				} else if (contains(Constants.CONVEYOR_CELL_INDICES, i)) {
 
 					if (conveyorIndex < conveyorBelts.size()) {
 						cellToPlace = conveyorBelts.get(conveyorIndex++);
 					} else {
-						cellToPlace = new Cell("Normal Rest Cell " + i);
+						cellToPlace = new Cell("Normal Rest Cell");
 					}
 
 				} else if (contains(Constants.SOCK_CELL_INDICES, i)) {
@@ -155,7 +155,7 @@ public class Board {
 					if (sockIndex < contaminationSocks.size()) {
 						cellToPlace = contaminationSocks.get(sockIndex++);
 					} else {
-						cellToPlace = new Cell("Normal Rest Cell " + i);
+						cellToPlace = new Cell("Normal Rest Cell");
 					}
 
 				} else if (contains(Constants.MONSTER_CELL_INDICES, i)) {
@@ -218,15 +218,12 @@ public void moveMonster(Monster currentMonster, int roll, Monster opponentMonste
 // exception if collission
         if (currentMonster.getPosition() == opponentMonster.getPosition() && currentMonster.getPosition() != 0) {
             currentMonster.setPosition(originalPosition);
+			updateMonsterPositions(currentMonster, opponentMonster);
             throw new InvalidMoveException("Invalid move: Cannot land on the opponent's cell.");
         }
 
         if (currentMonster.isConfused()) {
-            currentMonster.decrementConfusion();
-		
-        if (opponentMonster.isConfused()) {
-            opponentMonster.decrementConfusion();
-        }}
+            currentMonster.decrementConfusion();}
 
         updateMonsterPositions(currentMonster, opponentMonster);
     }

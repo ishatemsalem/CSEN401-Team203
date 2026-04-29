@@ -102,12 +102,10 @@ private Monster getCurrentOpponent() {
 	public void playTurn() throws InvalidMoveException{
 		if(getCurrent().isFrozen()) {
 			getCurrent().setFrozen(false);
-			this.switchTurn();
 		}
 		else {
 			int count= this.rollDice();
 			this.getBoard().moveMonster(this.getCurrent(), count, this.getCurrentOpponent());
-			this.switchTurn();
 			}
 		this.switchTurn();
 		}
