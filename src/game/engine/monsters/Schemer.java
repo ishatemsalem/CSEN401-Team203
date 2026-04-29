@@ -28,8 +28,5 @@ public class Schemer extends Monster {
 		setEnergy(getEnergy() + total);
     }
 
-	@Override
-    public void alterEnergy(int energyChange) {
-        super.alterEnergy(energyChange + Constants.SCHEMER_STEAL);
-    }
+	
 }

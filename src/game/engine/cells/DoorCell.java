@@ -1,8 +1,11 @@
 package game.engine.cells;
 
 import game.engine.Role;
-import game.engine.interfaces.CanisterModifier;
 import game.engine.monsters.Monster;
+
+import game.engine.interfaces.CanisterModifier;
+
+
 
 public class DoorCell extends Cell implements CanisterModifier {
 	private Role role;
@@ -35,6 +38,13 @@ public class DoorCell extends Cell implements CanisterModifier {
 
 
 	/* el goz2 el gdeed elly feeh skeleton */
+	
+	@Override
 	public void modifyCanisterEnergy(Monster monster, int canisterValue) {
+		
+        if (monster == null)
+            throw new IllegalArgumentException("Monster can't be null");
+
+        monster.alterEnergy(canisterValue);
     }
 }

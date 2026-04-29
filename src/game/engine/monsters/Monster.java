@@ -84,7 +84,11 @@ public abstract class Monster implements Comparable<Monster> {
 	}
 	
 	public void setConfusionTurns(int confusionTurns) {
-		this.confusionTurns = confusionTurns;
+    	this.confusionTurns = confusionTurns;
+
+		if (this.confusionTurns == 0) {
+			this.role = this.originalRole;
+		}
 	}
 
 	@Override
@@ -104,16 +108,13 @@ public abstract class Monster implements Comparable<Monster> {
 	}
 
 	public void move(int distance) {
-		position += distance;
-
-    	if (position > Constants.BOARD_SIZE - 1) {
-        	position = Constants.BOARD_SIZE - 1;
-    	} else if (position < 0) {
-        	position = 0;
-    	}
+		
+		int position = (this.position + distance) % Constants.BOARD_SIZE;
+    	
+    	setPosition(position);
 	}
 
-	public void alterEnergy(int energy) {
+	public final void alterEnergy(int energy) {
 		 if (energy < 0 && shielded) {
         	shielded = false;
         return;

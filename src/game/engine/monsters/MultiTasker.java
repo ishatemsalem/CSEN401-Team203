@@ -1,7 +1,7 @@
 package game.engine.monsters;
 
-import game.engine.Constants;
 import game.engine.Role;
+
 
 public class MultiTasker extends Monster {
 	private int normalSpeedTurns;
@@ -36,8 +36,5 @@ public class MultiTasker extends Monster {
         }
     }
 
-	@Override
-    public void alterEnergy(int energyChange) {
-        super.alterEnergy(energyChange + Constants.MULTITASKER_BONUS);
-    }
+	
 }

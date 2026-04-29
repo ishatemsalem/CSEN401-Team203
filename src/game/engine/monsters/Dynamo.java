@@ -16,8 +16,5 @@ public class Dynamo extends Monster {
 		opponentMonster.setFrozen(true);
     }
 	
-	@Override
-	public void alterEnergy(int energyChange) {
-		super.alterEnergy(energyChange * 2);
-	}
+	
 }
