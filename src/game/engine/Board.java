@@ -128,7 +128,7 @@ public class Board {
 
 		for (int i = 0; i < Constants.BOARD_SIZE; i++) {
 
-			if (i % 2 == 0) {
+			if (i % 2 == 1) {
 
 				if (doorIndex < doorCells.size()) {
 					cellToPlace = doorCells.get(doorIndex++);
@@ -207,7 +207,7 @@ public class Board {
 
 public void moveMonster(Monster currentMonster, int roll, Monster opponentMonster) throws InvalidMoveException {
         int originalPosition = currentMonster.getPosition();
-        
+
         currentMonster.move(roll);
 
         Cell landedCell = getCell(currentMonster.getPosition());
@@ -223,10 +223,10 @@ public void moveMonster(Monster currentMonster, int roll, Monster opponentMonste
 
         if (currentMonster.isConfused()) {
             currentMonster.decrementConfusion();
-        }
+		
         if (opponentMonster.isConfused()) {
             opponentMonster.decrementConfusion();
-        }
+        }}
 
         updateMonsterPositions(currentMonster, opponentMonster);
     }

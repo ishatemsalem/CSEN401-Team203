@@ -35,7 +35,7 @@ public class Game{
 		Board.setStationedMonsters(list);
 		ArrayList<Cell> specialCells = DataLoader.readCells();
 		
-		this.getBoard().initializeBoard(specialCells);
+		this.getBoard().initializeBoard(specialCells); // Instance method call on the board object [cite: 147]
 	}
 	
 	public Board getBoard() {
@@ -112,7 +112,7 @@ private Monster getCurrentOpponent() {
 		this.switchTurn();
 		}
 	private void switchTurn() {
-		if (this.getCurrent().getRole() == this.getPlayer().getRole()) {
+		if (this.getCurrent() == this.getPlayer()) {
 			this.setCurrent(this.getOpponent());
 		} else {
 			this.setCurrent(this.getPlayer());

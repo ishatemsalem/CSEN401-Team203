@@ -25,8 +25,8 @@ public class MonsterCell extends Cell {
                 int initialEnergy = landingMonster.getEnergy();
                 int penalty = getCellMonster().getEnergy() - landingMonster.getEnergy();
 
-                landingMonster.alterEnergy(penalty);
-                getCellMonster().setEnergy(initialEnergy);
+                landingMonster.alterEnergy(penalty - initialEnergy);
+                getCellMonster().alterEnergy(initialEnergy- penalty);
             }
         }
     }
