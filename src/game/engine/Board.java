@@ -218,13 +218,13 @@ public void moveMonster(Monster currentMonster, int roll, Monster opponentMonste
 // exception if collission
         if (currentMonster.getPosition() == opponentMonster.getPosition() && currentMonster.getPosition() != 0) {
             currentMonster.setPosition(originalPosition);
-			updateMonsterPositions(currentMonster, opponentMonster);
             throw new InvalidMoveException("Invalid move: Cannot land on the opponent's cell.");
         }
 
         if (currentMonster.isConfused()) {
             currentMonster.decrementConfusion();}
-
+		if (opponentMonster.isConfused()) {
+			opponentMonster.decrementConfusion();}
         updateMonsterPositions(currentMonster, opponentMonster);
     }
 	
