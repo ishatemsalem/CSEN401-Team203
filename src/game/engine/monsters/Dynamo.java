@@ -11,6 +11,10 @@ public class Dynamo extends Monster {
 
 
 	/* el goz2 el gdeed elly feeh skeleton*/
+	@Override
 	public void executePowerupEffect(Monster opponentMonster) {
+		opponentMonster.setFrozen(true);
     }
+	
+	
 }
