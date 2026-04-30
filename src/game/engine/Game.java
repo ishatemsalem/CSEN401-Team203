@@ -27,7 +27,9 @@ public class Game{
     this.opponent = selectRandomMonsterByRole(playerRole == Role.SCARER ? Role.LAUGHER : Role.SCARER);
     this.current = player;
     
-    // Correctly instantiate the stationed monsters list from allMonsters
+	this.allMonsters.remove(this.player);
+    this.allMonsters.remove(this.opponent);
+	
     ArrayList<Monster> list = new ArrayList<>(this.allMonsters);
     list.remove(this.player);
     list.remove(this.opponent);
