@@ -38,32 +38,33 @@ public class DoorCell extends Cell implements CanisterModifier {
 	/* el goz2 el gdeed elly feeh skeleton */
 	@Override
     public void onLand(Monster landingMonster, Monster opponentMonster) {
-        super.onLand(landingMonster, opponentMonster);
-        
-        if (!isActivated()) { 
-            int modifier = (this.role == landingMonster.getRole()) ? this.energy : -this.energy;
-            boolean stateChanged = false;
+		super.onLand(landingMonster, opponentMonster);
 
-            int initialCanister = landingMonster.getEnergy();
-            modifyCanisterEnergy(landingMonster, modifier);
-            if (landingMonster.getEnergy() != initialCanister) stateChanged = true;
+		if (!isActivated()) {
+			boolean stateChanged = false;
+			int initialCanister = landingMonster.getEnergy();
+			boolean penaltyBlocked = landingMonster.isShielded() && (this.role != landingMonster.getRole());
 
-            for (Monster stationed : Board.getStationedMonsters()) {
-                if (stationed.getRole() == landingMonster.getRole()) {
-                    int initialStationed = stationed.getEnergy();
-                    modifyCanisterEnergy(stationed, modifier);
-                    if (stationed.getEnergy() != initialStationed) stateChanged = true;
-                }
-            }
+			modifyCanisterEnergy(landingMonster, this.energy);
+			if (landingMonster.getEnergy() != initialCanister) {
+				stateChanged = true;}
 
-            if (stateChanged) {
-                setActivated(true);
-            }
-        }
-    }
+			if (!penaltyBlocked) {
+				for (Monster stationed : Board.getStationedMonsters()) {
+					if (stationed.getRole() == landingMonster.getRole()) {
+						int initialStationed = stationed.getEnergy();
+						modifyCanisterEnergy(stationed, this.energy);
+						if (stationed.getEnergy() != initialStationed) {
+							stateChanged = true;}}}}
+
+			if (stateChanged) {
+				setActivated(true);
+			}}
+}
 
     @Override
     public void modifyCanisterEnergy(Monster monster, int canisterValue) {
-		monster.alterEnergy(canisterValue);
+		int modifier = (this.role == monster.getRole()) ? canisterValue : -canisterValue;
+    	monster.alterEnergy(modifier);
     }
 }

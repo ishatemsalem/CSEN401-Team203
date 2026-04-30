@@ -20,22 +20,21 @@ public class Game{
 	private Monster current;
 	
 	public Game(Role playerRole) throws IOException {
-		this.board = new Board(DataLoader.readCards());
-
-		ArrayList<Monster> list= Board.getStationedMonsters();
-
-		this.allMonsters = DataLoader.readMonsters();
-		
-		this.player = selectRandomMonsterByRole(playerRole);
-		this.opponent = selectRandomMonsterByRole(playerRole == Role.SCARER ? Role.LAUGHER : Role.SCARER);
-		this.current = player;
-
-		list.remove(this.player);
-		list.remove(this.opponent);
-		Board.setStationedMonsters(list);
-		ArrayList<Cell> specialCells = DataLoader.readCells();
-		
-		this.getBoard().initializeBoard(specialCells); // Instance method call on the board object [cite: 147]
+	
+	this.board = new Board(DataLoader.readCards());
+    this.allMonsters = DataLoader.readMonsters();
+    this.player = selectRandomMonsterByRole(playerRole);
+    this.opponent = selectRandomMonsterByRole(playerRole == Role.SCARER ? Role.LAUGHER : Role.SCARER);
+    this.current = player;
+    
+    // Correctly instantiate the stationed monsters list from allMonsters
+    ArrayList<Monster> list = new ArrayList<>(this.allMonsters);
+    list.remove(this.player);
+    list.remove(this.opponent);
+    Board.setStationedMonsters(list);
+    
+    ArrayList<Cell> specialCells = DataLoader.readCells();
+    this.board.initializeBoard(specialCells);
 	}
 	
 	public Board getBoard() {

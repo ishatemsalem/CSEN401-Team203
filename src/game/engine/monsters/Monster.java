@@ -108,22 +108,36 @@ public abstract class Monster implements Comparable<Monster> {
 	}
 
 	public void move(int distance) {
-		
+
 		int position = (this.position + distance) % Constants.BOARD_SIZE;
-    	
-    	setPosition(position);
+
+		if (position < 0) {
+			position += Constants.BOARD_SIZE;
+		}
+
+		setPosition(position);
 	}
 
 	public final void alterEnergy(int energy) {
-		 if (energy < 0 && shielded) {
-        	shielded = false;
-        return;
-    	}
-		this.energy += energy;
-
-   		if (this.energy < Constants.MIN_ENERGY) {
-        	this.energy = Constants.MIN_ENERGY;
-    	}
+		int change = energy;
+		if (energy != 0) {
+			if (this instanceof Dynamo) {
+				change *= 2;
+			} else if (this instanceof MultiTasker) {
+				change += Constants.MULTITASKER_BONUS;
+			} else if (this instanceof Schemer) {
+				change += Constants.SCHEMER_STEAL;
+			}
+		}
+		
+		if (change < 0 && shielded) {
+			shielded = false;
+			return;
+		}
+		this.energy += change;
+		if (this.energy < Constants.MIN_ENERGY) {
+			this.energy = Constants.MIN_ENERGY;
+		}
 	}
 
 	public void decrementConfusion() {
