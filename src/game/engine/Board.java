@@ -128,7 +128,7 @@ public class Board {
 
 		for (int i = 0; i < Constants.BOARD_SIZE; i++) {
 
-			if (i % 2 == 1) {
+			if (i % 2 != 0) {
 
 				if (doorIndex < doorCells.size()) {
 					cellToPlace = doorCells.get(doorIndex++);
@@ -147,7 +147,7 @@ public class Board {
 					if (conveyorIndex < conveyorBelts.size()) {
 						cellToPlace = conveyorBelts.get(conveyorIndex++);
 					} else {
-						cellToPlace = new Cell("Normal Rest Cell");
+						cellToPlace = new Cell("Normal Rest Cell" + i);
 					}
 
 				} else if (contains(Constants.SOCK_CELL_INDICES, i)) {
@@ -155,7 +155,7 @@ public class Board {
 					if (sockIndex < contaminationSocks.size()) {
 						cellToPlace = contaminationSocks.get(sockIndex++);
 					} else {
-						cellToPlace = new Cell("Normal Rest Cell");
+						cellToPlace = new Cell("Normal Rest Cell" +i );
 					}
 
 				} else if (contains(Constants.MONSTER_CELL_INDICES, i)) {
