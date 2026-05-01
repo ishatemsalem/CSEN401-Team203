@@ -27,6 +27,12 @@ public class Schemer extends Monster {
 			total += stealEnergyFrom(m);
 		}
 		this.alterEnergy(total);
-	} }
+	} 
+	
+	public void setEnergy(int energy) {
+	    int change = energy - this.getEnergy();
+	    super.setEnergy(this.getEnergy() + change + Constants.SCHEMER_STEAL);
+	}
+}
 
 	

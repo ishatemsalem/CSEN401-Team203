@@ -119,24 +119,11 @@ public abstract class Monster implements Comparable<Monster> {
 	}
 
 	public final void alterEnergy(int energy) {
-		int change = energy;
-		
-		if (this instanceof Dynamo) {
-			change *= 2;
-		} else if (this instanceof MultiTasker) {
-			change += Constants.MULTITASKER_BONUS;
-		} else if (this instanceof Schemer) {
-			change += Constants.SCHEMER_STEAL;
-		}
-
-		if (change < 0 && shielded) {
-			shielded = false;
-			return;
-		}
-		this.energy += change;
-		if (this.energy < Constants.MIN_ENERGY) {
-			this.energy = Constants.MIN_ENERGY;
-		}
+		if (energy < 0 && shielded) {  // "If the monster is shielded and the change is negative, the shield is consumed and the energy is not altered"
+	        shielded = false;
+	        return;
+	    }
+	    setEnergy(this.energy + energy); //"Otherwise, the energy is set with the old value plus the incoming energy", setEnergy() is overrideen in the subclasses
 	}
 
 	public void decrementConfusion() {
