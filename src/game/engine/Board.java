@@ -212,14 +212,17 @@ public class Board {
 		if (landedCell != null) {
 			landedCell.onLand(currentMonster, opponentMonster);
 		}
-		// exception if collission
-		if (currentMonster.getPosition() == opponentMonster.getPosition() && currentMonster.getPosition() != 0) {
+		// exception if collision
+		if (currentMonster.getPosition() == opponentMonster.getPosition()) { 
 			currentMonster.setPosition(originalPosition);
 			throw new InvalidMoveException("Invalid move: Cannot land on the opponent's cell.");
 		}
 		
-		if (currentMonster.isConfused()) {
-			currentMonster.decrementConfusion();
+		if (currentMonster.isConfused()) {       //If monsters are confused, confusion is decremented for BOTH monsters after landing on a cell
+		    currentMonster.decrementConfusion();
+		    if (opponentMonster.isConfused()) {
+		        opponentMonster.decrementConfusion();
+		    }
 		}
 		
 		updateMonsterPositions(currentMonster, opponentMonster);
