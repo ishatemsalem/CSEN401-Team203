@@ -215,10 +215,11 @@ public class Board {
 		// exception if collision
 		if (currentMonster.getPosition() == opponentMonster.getPosition()) { 
 			currentMonster.setPosition(originalPosition);
+			updateMonsterPositions(currentMonster, opponentMonster);  // sync board state before retrying turn "Therefore, the board’s cell references are synchronised with monsters’ positions via updateMonsterPositions."
 			throw new InvalidMoveException("Invalid move: Cannot land on the opponent's cell.");
 		}
 		
-		if (currentMonster.isConfused()) {       //If monsters are confused, confusion is decremented for BOTH monsters after landing on a cell
+		if (currentMonster.isConfused()) {       //"If monsters are confused, confusion is decremented for BOTH monsters after landing on a cell"
 		    currentMonster.decrementConfusion();
 		    if (opponentMonster.isConfused()) {
 		        opponentMonster.decrementConfusion();
