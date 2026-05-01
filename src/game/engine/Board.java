@@ -207,6 +207,10 @@ public class Board {
 
 	public void moveMonster(Monster currentMonster, int roll, Monster opponentMonster) throws InvalidMoveException {
 		int originalPosition = currentMonster.getPosition();
+
+		boolean currentWasConfused = currentMonster.isConfused();
+		boolean opponentWasConfused = opponentMonster.isConfused();
+
 		currentMonster.move(roll);
 		Cell landedCell = getCell(currentMonster.getPosition());
 		if (landedCell != null) {
@@ -219,13 +223,13 @@ public class Board {
 			throw new InvalidMoveException("Invalid move: Cannot land on the opponent's cell.");
 		}
 		
-		if (currentMonster.isConfused()) {       //"If monsters are confused, confusion is decremented for BOTH monsters after landing on a cell"
-		    currentMonster.decrementConfusion();
-		    if (opponentMonster.isConfused()) {
-		        opponentMonster.decrementConfusion();
-		    }
-		}
+		if (currentWasConfused) {
+			currentMonster.decrementConfusion();
 		
+		if (opponentWasConfused) {
+			opponentMonster.decrementConfusion();
+		}}
+
 		updateMonsterPositions(currentMonster, opponentMonster);
 	}
 	
