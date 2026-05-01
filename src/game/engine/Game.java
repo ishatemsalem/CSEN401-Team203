@@ -36,7 +36,7 @@ public class Game{
     Board.setStationedMonsters(list);
     
     ArrayList<Cell> specialCells = DataLoader.readCells();
-    this.board.initializeBoard(specialCells);
+    this.getBoard().initializeBoard(specialCells);
 	}
 	
 	public Board getBoard() {
