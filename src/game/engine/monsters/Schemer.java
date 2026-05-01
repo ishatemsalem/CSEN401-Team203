@@ -1,5 +1,7 @@
 package game.engine.monsters;
 
+import game.engine.Board;
+import game.engine.Constants;
 import game.engine.Role;
 
 public class Schemer extends Monster {
@@ -9,11 +11,22 @@ public class Schemer extends Monster {
 	}
 
 	/* el goz2 el gdeed elly feeh skeleton */
-
 	private int stealEnergyFrom(Monster target) {
-        return 0;
-    }
-	
+		int amount = Math.min(Constants.SCHEMER_STEAL, target.getEnergy());
+		boolean wasShielded = target.isShielded();
+		target.setShielded(false); // temp shield disable 3ashan edge
+		target.alterEnergy(-amount);
+		target.setShielded(wasShielded);
+		return amount;
+	} 
+	@Override
 	public void executePowerupEffect(Monster opponentMonster) {
-    }
-}
+		int total = 0;
+		total += stealEnergyFrom(opponentMonster);
+		for (Monster m : Board.getStationedMonsters()) {
+			total += stealEnergyFrom(m);
+		}
+		this.alterEnergy(total);
+	} }
+
+	

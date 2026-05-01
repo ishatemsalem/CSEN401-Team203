@@ -1,5 +1,6 @@
 package game.engine.cells;
 
+import game.engine.Constants;
 import game.engine.monsters.Monster;
 
 public abstract class TransportCell extends Cell {
@@ -18,12 +19,16 @@ public abstract class TransportCell extends Cell {
 
 	/* el goz2 el gdeed elly feeh skeleton */
 	public void transport(Monster monster) {
-        monster.move(this.getEffect());
-    }
+		int newPos = (monster.getPosition() + this.getEffect()) % Constants.BOARD_SIZE;
+		if (newPos < 0) {
+			newPos += Constants.BOARD_SIZE;
+		}
+		monster.setPosition(newPos);
+	}
 
     @Override
-    public void onLand(Monster landingMonster, Monster opponentMonster) {
-        super.onLand(landingMonster, opponentMonster);
-        transport(landingMonster); 
-    }
+	public void onLand(Monster landingMonster, Monster opponentMonster) {
+		super.onLand(landingMonster, opponentMonster);
+		transport(landingMonster);
+	}
 }

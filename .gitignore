@@ -33,3 +33,4 @@ bin/
 .classpath
 /bin1/
 .vscode
+.settings
