@@ -11,13 +11,10 @@ public class Schemer extends Monster {
 	}
 
 	/* el goz2 el gdeed elly feeh skeleton */
-	private int stealEnergyFrom(Monster target) {
+	private int stealEnergyFrom(Monster target) {  
 		int amount = Math.min(Constants.SCHEMER_STEAL, target.getEnergy());
-		boolean wasShielded = target.isShielded();
-		target.setShielded(false); // temp shield disable 3ashan edge
-		target.alterEnergy(-amount);
-		target.setShielded(wasShielded);
-		return amount;
+	    target.setEnergy(target.getEnergy() - amount);  //"Not affected by the shield", use setEnergy directly not alterEnergy so that passive bonuses arent triggered
+	    return amount;
 	} 
 	@Override
 	public void executePowerupEffect(Monster opponentMonster) {
