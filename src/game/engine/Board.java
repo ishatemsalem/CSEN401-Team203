@@ -5,19 +5,8 @@ import java.util.Collections;
 
 import game.engine.cards.Card;
 import game.engine.cells.*;
-import game.engine.monsters.Monster;
-
-
-
-/* el goz2 el gdeed elly feeh skeleton, imports edition*/
-import java.util.ArrayList;
-
-import game.engine.cards.Card;
-import game.engine.monsters.Monster;
 import game.engine.exceptions.InvalidMoveException;
-
-
-
+import game.engine.monsters.Monster;
 
 public class Board {
 	private Cell[][] boardCells;
@@ -30,12 +19,10 @@ public class Board {
 		stationedMonsters = new ArrayList<Monster>();
 		originalCards = readCards;
 		cards = new ArrayList<Card>();
-
-		/* */
 		setCardsByRarity();
-        reloadCards();
+		reloadCards();
 	}
-	
+
 	public Cell[][] getBoardCells() {
 		return boardCells;
 	}
@@ -60,197 +47,111 @@ public class Board {
 		Board.cards = cards;
 	}
 
-
-	/* el goz2 el gdeed elly feeh skeleton, imports edition*/
-
 	private int[] indexToRowCol(int index) {
-        
-		int row = index / Constants.BOARD_COLS;
-		int col = index % Constants.BOARD_COLS;
-		if (row%2 != 0) 
-			col = Constants.BOARD_COLS - 1 - col;     // For zigzag pattern, reverse column index for odd rows
-		return new int[]{row, col};
+	    int cols = Constants.BOARD_COLS;
 
-    }
+	    int row = index / cols;
+	    int col = index % cols;
 
-    private Cell getCell(int index) {
-        int[] rowCol = indexToRowCol(index);
-		return boardCells[rowCol[0]][rowCol[1]];
-    }
+	    if (row % 2 == 1)
+	        col = cols - 1 - col;
 
-    private void setCell(int index, Cell cell) {
-		int[] rowCol = indexToRowCol(index);
-		boardCells[rowCol[0]][rowCol[1]] = cell;
-    }
-
-
-	//this method will be the end of me
-    
-
-	private boolean contains(int[] arr, int value) { //helper method to check if an index belongs to a certain type of cell
-		if (arr == null) {
-			return false;
-		}
-		for(int i=0; i<arr.length; i++) {
-			if (arr[i] == value) {
-				return true;
-			}
-		}
-		return false;
+	    return new int[]{row, col};
 	}
 
-	public void initializeBoard(ArrayList<Cell> specialCells) {
-		if (specialCells == null) {
-			throw new IllegalArgumentException("specialCells list cannot be null");
-		}
-
-		// Separate the CSV-loaded cells by type
-		ArrayList<DoorCell> doorCells = new ArrayList<>();
-		ArrayList<ConveyorBelt> conveyorBelts = new ArrayList<>();
-		ArrayList<ContaminationSock> contaminationSocks = new ArrayList<>();
-
-		for (Cell cell : specialCells) {
-			if (cell instanceof DoorCell) {
-				doorCells.add((DoorCell) cell);
-			} else if (cell instanceof ConveyorBelt) {
-				conveyorBelts.add((ConveyorBelt) cell);
-			} else if (cell instanceof ContaminationSock) {
-				contaminationSocks.add((ContaminationSock) cell);
-			}
-		}
-
-		int doorIndex = 0;
-		int conveyorIndex = 0;
-		int sockIndex = 0;
-		int monsterIndex = 0;
-
-		Cell cellToPlace = null;
-
-		for (int i = 0; i < Constants.BOARD_SIZE; i++) {
-
-			if (i % 2 != 0) {
-
-				if (doorIndex < doorCells.size()) {
-					cellToPlace = doorCells.get(doorIndex++);
-				} else {
-					cellToPlace = new Cell("Normal Rest Cell");
-				}
-
-			} else {
-
-				if (contains(Constants.CARD_CELL_INDICES, i)) {
-
-					cellToPlace = new CardCell("Card Cell");
-
-				} else if (contains(Constants.CONVEYOR_CELL_INDICES, i)) {
-
-					if (conveyorIndex < conveyorBelts.size()) {
-						cellToPlace = conveyorBelts.get(conveyorIndex++);
-					} else {
-						cellToPlace = new Cell("Normal Rest Cell" + i);
-					}
-
-				} else if (contains(Constants.SOCK_CELL_INDICES, i)) {
-
-					if (sockIndex < contaminationSocks.size()) {
-						cellToPlace = contaminationSocks.get(sockIndex++);
-					} else {
-						cellToPlace = new Cell("Normal Rest Cell" +i );
-					}
-
-				} else if (contains(Constants.MONSTER_CELL_INDICES, i)) {
-
-					if (monsterIndex < stationedMonsters.size()) {
-						Monster stationedMonster = stationedMonsters.get(monsterIndex++);
-						stationedMonster.setPosition(i);
-						cellToPlace = new MonsterCell(
-							stationedMonster.getName(),
-							stationedMonster
-						);
-					} else {
-						cellToPlace = new Cell("Normal Rest Cell" + i);
-					}
-
-				} else {
-					cellToPlace = new Cell("Normal Rest Cell" + i);
-				}
-			}
-
-			setCell(i, cellToPlace);
-		}
-	}	
 	
+	private Cell getCell(int index) {
+		int[] pos = indexToRowCol(index);
+		return boardCells[pos[0]][pos[1]];
+	}
+	
+	private void setCell(int index, Cell cell) {
+		int[] pos = indexToRowCol(index);
+		boardCells[pos[0]][pos[1]] = cell;
+	}
+	
+	public void initializeBoard(ArrayList<Cell> specialCells) {
+		ArrayList<Cell> doorCells = new ArrayList<>();
+	    ArrayList<Cell> conveyorCells = new ArrayList<>();
+		ArrayList<Cell> contaminationCells = new ArrayList<>();
+		
+	    for (Cell cell : specialCells) {
+	        if (cell instanceof DoorCell) 
+	            doorCells.add(cell);
+	        else if (cell instanceof ConveyorBelt) 
+	        	conveyorCells.add(cell);
+	        else if (cell instanceof ContaminationSock) 
+	            contaminationCells.add(cell);
+	    }
+	    
+	    for (int i = 0; i < Constants.BOARD_SIZE; i++) 
+	    	setCell(i, (i % 2 == 0) ? new Cell("Normal Rest Corridor") : doorCells.remove(0));
+	       
+	    for (int cardIndex : Constants.CARD_CELL_INDICES) 
+	        setCell(cardIndex, new CardCell("Card Cell"));
+	    
+	    for (int conveyorIndex : Constants.CONVEYOR_CELL_INDICES) 
+	        setCell(conveyorIndex, conveyorCells.remove(0));
+	    
+	    for (int contaminationIndex : Constants.SOCK_CELL_INDICES) 
+	        setCell(contaminationIndex, contaminationCells.remove(0));
 
-    private void setCardsByRarity() {
-		ArrayList<Card> expandedList = new ArrayList<>();
-        for (int i = 0; i < originalCards.size(); i++) {
-			Card card = originalCards.get(i);
-            int rarity = card.getRarity(); 
+	    for (int i = 0; i < stationedMonsters.size(); i++) {
+	        Monster monster = stationedMonsters.get(i);
+	        monster.setPosition(Constants.MONSTER_CELL_INDICES[i]);
+	        setCell(Constants.MONSTER_CELL_INDICES[i], new MonsterCell(monster.getName(), monster));
+	    }
+	}
+	
+	private void setCardsByRarity() {
+	    ArrayList<Card> expandedCards = new ArrayList<>();
 
-            for (int j = 0; j < rarity; j++) {
-                expandedList.add(card);
-            }
-        }
-        originalCards = expandedList; 
-    }
-
-    public static void reloadCards() {
+	    for (Card card : originalCards)
+	        expandedCards.addAll(Collections.nCopies(card.getRarity(), card));
+	    
+	    originalCards = expandedCards;
+	}
+	
+	public static void reloadCards() {
 		cards = new ArrayList<>(originalCards);
-        Collections.shuffle(cards);
+		Collections.shuffle(cards);
     }
-
-    public static Card drawCard() {
-        if (cards.isEmpty()) 
-            reloadCards();
-        return cards.remove(0);
-    }
+	
+	public static Card drawCard() {
+		if (cards.isEmpty()) 
+			reloadCards();
+		
+		return cards.remove(0);
+	}
 
 	public void moveMonster(Monster currentMonster, int roll, Monster opponentMonster) throws InvalidMoveException {
-		int originalPosition = currentMonster.getPosition();
+	    Role oldRole = currentMonster.getRole();
+	    int oldPosition = currentMonster.getPosition();
+	    
+	    currentMonster.move(roll);
 
-		boolean currentWasConfused = currentMonster.isConfused();
-		boolean opponentWasConfused = opponentMonster.isConfused();
+	    getCell(currentMonster.getPosition()).onLand(currentMonster, opponentMonster);
 
-		currentMonster.move(roll);
-		Cell landedCell = getCell(currentMonster.getPosition());
-		if (landedCell != null) {
-			landedCell.onLand(currentMonster, opponentMonster);
-		}
-		// exception if collision
-		if (currentMonster.getPosition() == opponentMonster.getPosition()) { 
-			currentMonster.setPosition(originalPosition);
-			updateMonsterPositions(currentMonster, opponentMonster);  // sync board state before retrying turn "Therefore, the board’s cell references are synchronised with monsters’ positions via updateMonsterPositions."
-			throw new InvalidMoveException("Invalid move: Cannot land on the opponent's cell.");
-		}
-		
-		if (currentWasConfused) {
-			currentMonster.decrementConfusion();
-		
-		if (opponentWasConfused) {
-			opponentMonster.decrementConfusion();
-		}}
-
-		updateMonsterPositions(currentMonster, opponentMonster);
-	}
+	    if (currentMonster.getPosition() == opponentMonster.getPosition()) {
+	        currentMonster.setPosition(oldPosition);
+	        throw new InvalidMoveException("Cannot land on opponent!");
+	    }
+	    
+		// To make sure we dont decrement right after getting the confusion card action upon on land
 	
-    private void updateMonsterPositions(Monster player, Monster opponent) { 
-		
-        for (int i = 0; i < Constants.BOARD_ROWS; i++) {
-            for (int j = 0; j < Constants.BOARD_COLS; j++) {
-                boardCells[i][j].setMonster(null);
-            }
-        }
-		if(stationedMonsters != null) {
-		for (Monster m : stationedMonsters) {
-			Cell c = getCell(m.getPosition());
-			if (c!= null) {
-				c.setMonster(m);
-			}
-		}
+	    if (currentMonster.isConfused() && currentMonster.getRole() == oldRole) {
+	        currentMonster.decrementConfusion();
+	        opponentMonster.decrementConfusion();
+	    }
+	    
+	    updateMonsterPositions(currentMonster, opponentMonster);
 	}
 
-        getCell(player.getPosition()).setMonster(player);
-        getCell(opponent.getPosition()).setMonster(opponent);
-    }
-
+	private void updateMonsterPositions(Monster player, Monster opponent) {
+		for (int i = 0; i < Constants.BOARD_SIZE; i++) 
+			getCell(i).setMonster(null);
+		
+		getCell(player.getPosition()).setMonster(player);
+		getCell(opponent.getPosition()).setMonster(opponent);
+	}
 }

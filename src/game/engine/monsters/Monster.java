@@ -84,10 +84,35 @@ public abstract class Monster implements Comparable<Monster> {
 	}
 	
 	public void setConfusionTurns(int confusionTurns) {
-    	this.confusionTurns = confusionTurns;
+		this.confusionTurns = confusionTurns;
+	}
 
-		if (this.confusionTurns == 0) {
-			this.role = this.originalRole;
+	public abstract void executePowerupEffect(Monster opponentMonster);
+	
+	public boolean isConfused() {
+		return confusionTurns > 0;
+	}
+	
+	public void move(int distance) {
+		this.setPosition(this.getPosition() + distance);
+	}
+	
+	public final void alterEnergy(int energy) {
+		if (shielded && energy < 0) {
+			System.out.println(name + "'s shield blocked " + (-energy) + " damage!");
+			shielded = false; // Shield breaks after one use
+		}
+		
+		else 
+			this.setEnergy(this.getEnergy() + energy);	
+	}
+	
+	public void decrementConfusion() {
+		if (isConfused()) {
+			this.setConfusionTurns(this.getConfusionTurns() - 1);
+			
+			if(!isConfused())
+				this.setRole(originalRole);
 		}
 	}
 
@@ -95,44 +120,5 @@ public abstract class Monster implements Comparable<Monster> {
 	public int compareTo(Monster other) {
 		return this.position - other.position;
 	}
-
-
-
-/* el goz2 el gdeed elly feeh skeleton */
-
-
-	public abstract void executePowerupEffect(Monster opponentMonster);
-
-	public boolean isConfused() {
-		return confusionTurns>0;
-	}
-
-	public void move(int distance) {
-
-		int position = (this.position + distance) % Constants.BOARD_SIZE;
-
-		if (position < 0) {
-			position += Constants.BOARD_SIZE;
-		}
-
-		setPosition(position);
-	}
-
-	public final void alterEnergy(int energy) {
-		if (energy < 0 && shielded) {  // "If the monster is shielded and the change is negative, the shield is consumed and the energy is not altered"
-	        shielded = false;
-	        return;
-	    }
-	    setEnergy(this.energy + energy); //"Otherwise, the energy is set with the old value plus the incoming energy", setEnergy() is overrideen in the subclasses
-	}
-
-	public void decrementConfusion() {
-		if (confusionTurns > 0) {
-            confusionTurns--;
-			if (confusionTurns == 0)
-                role = originalRole;
-        }
-	}
-
 
 }

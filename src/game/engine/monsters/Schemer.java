@@ -9,27 +9,30 @@ public class Schemer extends Monster {
 	public Schemer(String name, String description, Role role, int energy) {
 		super(name, description, role, energy);
 	}
+	
+	@Override
+	public void setEnergy(int energy) {
+		super.setEnergy(energy + Constants.SCHEMER_STEAL);
+	}
 
-	/* el goz2 el gdeed elly feeh skeleton */
-	private int stealEnergyFrom(Monster target) {  
-		int amount = Math.min(Constants.SCHEMER_STEAL, target.getEnergy());
-	    target.setEnergy(target.getEnergy() - amount);  //"Not affected by the shield", use setEnergy directly not alterEnergy so that passive bonuses arent triggered
-	    return amount;
-	} 
 	@Override
 	public void executePowerupEffect(Monster opponentMonster) {
-		int total = 0;
-		total += stealEnergyFrom(opponentMonster);
-		for (Monster m : Board.getStationedMonsters()) {
-			total += stealEnergyFrom(m);
-		}
-		this.alterEnergy(total);
-	} 
-	
-	public void setEnergy(int energy) {
-	    int change = energy - this.getEnergy();
-	    super.setEnergy(this.getEnergy() + change + Constants.SCHEMER_STEAL);
-	}
-}
+	    System.out.println(getName() + " uses Chain Attack!");
+	    int totalStolen = stealEnergyFrom(opponentMonster);
 
+	    for (Monster target : Board.getStationedMonsters()) {
+	        totalStolen += stealEnergyFrom(target);
+	        System.out.println("  -> Stole from " + target.getName());
+	    }
+
+	    this.setEnergy(this.getEnergy() + totalStolen);
+	    System.out.println("Total stolen: " + totalStolen + " energy!");
+	}
 	
+	private int stealEnergyFrom(Monster target) {
+	    int stolen = Math.min(Constants.SCHEMER_STEAL, target.getEnergy());
+	    target.setEnergy(target.getEnergy() - stolen);
+	    return stolen;
+	}
+
+}

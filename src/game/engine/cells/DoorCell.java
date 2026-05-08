@@ -33,38 +33,38 @@ public class DoorCell extends Cell implements CanisterModifier {
 		this.activated = isActivated;
 	}
 
-
-
-	/* el goz2 el gdeed elly feeh skeleton */
 	@Override
-    public void onLand(Monster landingMonster, Monster opponentMonster) {
+	public void onLand(Monster landingMonster, Monster opponentMonster) {
 		super.onLand(landingMonster, opponentMonster);
+		
+		if(isActivated())
+			return; 
+		
+		System.out.println(landingMonster.getName() + " landed on " + role + " door!");
+		
+		boolean wasShielded = landingMonster.isShielded();
+	     
+		modifyCanisterEnergy(landingMonster, this.energy);
 
-		if (!isActivated()) {
-			boolean stateChanged = false;
-			int initialCanister = landingMonster.getEnergy();
-			boolean penaltyBlocked = landingMonster.isShielded() && (this.role != landingMonster.getRole());
+		// Only block if the monster took damage (opposing team) and was shielded
+		if (wasShielded && landingMonster.getRole() != this.role) 
+			return;
 
-			modifyCanisterEnergy(landingMonster, this.energy);
-			if (landingMonster.getEnergy() != initialCanister) {
-				stateChanged = true;}
+	    
+		for (Monster monster : Board.getStationedMonsters()) {
+			//Only affect team members
+			if (monster.getRole() == landingMonster.getRole()) {
+				modifyCanisterEnergy(monster, this.energy);
+				System.out.println("  -> " + monster.getName() + " got " + this.energy + " energy!");
+			}
+		}
+		
+		setActivated(true);
+	}
 
-			if (!penaltyBlocked) {
-				for (Monster stationed : Board.getStationedMonsters()) {
-					if (stationed.getRole() == landingMonster.getRole()) {
-						int initialStationed = stationed.getEnergy();
-						modifyCanisterEnergy(stationed, this.energy);
-						if (stationed.getEnergy() != initialStationed) {
-							stateChanged = true;}}}}
-
-			if (stateChanged) {
-				setActivated(true);
-			}}
-}
-
-    @Override
-    public void modifyCanisterEnergy(Monster monster, int canisterValue) {
-		int modifier = (this.role == monster.getRole()) ? canisterValue : -canisterValue;
-    	monster.alterEnergy(modifier);
-    }
+	@Override
+	public void modifyCanisterEnergy(Monster monster, int canisterValue) {
+		//Affect on team members vary according to role
+		monster.alterEnergy(this.role == monster.getRole() ? canisterValue : -canisterValue);
+	}
 }

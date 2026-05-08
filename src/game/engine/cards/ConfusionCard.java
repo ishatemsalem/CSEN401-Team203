@@ -1,9 +1,7 @@
 package game.engine.cards;
 
-import game.engine.monsters.Monster;
-
-/* */
 import game.engine.Role;
+import game.engine.monsters.Monster;
 
 public class ConfusionCard extends Card {
 	private int duration;
@@ -17,16 +15,13 @@ public class ConfusionCard extends Card {
 		return duration;
 	}
 
-
-	/* el goz2 el gdeed elly feeh skeleton */
 	@Override
-    public void performAction(Monster player, Monster opponent) {
-        Role temp = player.getRole();
-        player.setRole(opponent.getRole());
-        opponent.setRole(temp);
-
-        // set confusion turns to card's duration, not accumulate — prevents stacking if confusion is reapplied
-        player.setConfusionTurns(getDuration());
-        opponent.setConfusionTurns(getDuration());
-    }
+	public void performAction(Monster player, Monster opponent) {
+		player.setConfusionTurns(this.getDuration());
+		opponent.setConfusionTurns(this.getDuration());
+		Role playerRole = player.getRole();
+		player.setRole(opponent.getRole());
+		opponent.setRole(playerRole);
+	}
+	
 }

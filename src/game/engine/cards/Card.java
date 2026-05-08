@@ -31,9 +31,7 @@ public abstract class Card {
 	public boolean isLucky() {
 		return lucky;
 	}
-	
 
-
-	/* el goz2 el gdeed elly feeh skeleton */
 	public abstract void performAction(Monster player, Monster opponent);
+	
 }

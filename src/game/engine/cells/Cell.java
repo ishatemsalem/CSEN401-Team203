@@ -23,17 +23,11 @@ public class Cell {
 		this.monster = monster;
 	}
 
-
-
-	/* el goz2 el gdeed elly feeh skeleton */
 	public boolean isOccupied() {
-        return this.monster != null;
-    }
-
-    public void onLand(Monster landingMonster, Monster opponentMonster) {
-        setMonster(landingMonster);
-    }
-
+		return monster != null;
+	}
 	
-
+	public void onLand(Monster landingMonster, Monster opponentMonster) {
+		this.setMonster(landingMonster);
+	}
 }
