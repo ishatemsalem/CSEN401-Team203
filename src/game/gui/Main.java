@@ -1,12 +1,17 @@
 package game.gui;
 
+import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import java.io.File;
+import javafx.util.Duration;
 
 public class Main extends Application {
     private Stage window;
@@ -22,27 +27,64 @@ public class Main extends Application {
         rootLayout = new StackPane();
         mainScene = new Scene(rootLayout, 1280, 720);
         
-        // Initialize Audio 
         initAudio("assets/audio/lobby_theme.mp3");
 
-        // Load the Intro Screen first, PASSING IN THE AUDIO PLAYER
-        StartupScreen intro = new StartupScreen(this::switchToLobby, backgroundMusic);
+        // Load intro screen first, PASSING IN AUDIO PLAYER
+        StartupScreen intro = new StartupScreen(this::triggerFlashbangTransition, backgroundMusic);
         rootLayout.getChildren().add(intro.getView());
-
+        
         window.setScene(mainScene);
         window.show();
         
-        // Start the music and the intro sequence cleanly
+        // Start the music and the intro sequence
         if (backgroundMusic != null) {
             backgroundMusic.setOnPlaying(() -> {
-                // This will only fire exactly when the audio hits the speakers
+                // for sync purposes
                 intro.startSequence(); 
             });
             backgroundMusic.play();
         } else {
-            // Fallback just in case the audio file is missing
+            // justincase the audio file is missing
             intro.startSequence();
         }
+    }
+
+    private void triggerFlashbangTransition() {
+        //whitebox
+        Rectangle flashOverlay = new Rectangle(1280, 720, Color.WHITE);
+        flashOverlay.setMouseTransparent(true); // mouseclicks pass through
+        
+        flashOverlay.setBlendMode(BlendMode.ADD);
+        
+        rootLayout.getChildren().add(flashOverlay);
+
+        // Timing
+        Duration fadeInTime = Duration.seconds(2.0 / 60.0);
+        Duration fadeOutTime = Duration.seconds(53.0 / 60.0);
+
+        FadeTransition phaseIn = new FadeTransition(fadeInTime, flashOverlay);
+        phaseIn.setFromValue(0.0);
+        phaseIn.setToValue(1.0);
+
+        FadeTransition phaseOut = new FadeTransition(fadeOutTime, flashOverlay);
+        phaseOut.setFromValue(1.0);
+        phaseOut.setToValue(0.0);
+
+        // when fully white:
+        phaseIn.setOnFinished(e -> {
+            switchToLobby();
+            
+            // since switchToLobby() clears everything in rootLayout, put flash overlay on top again
+            rootLayout.getChildren().add(flashOverlay);
+            
+            phaseOut.play(); //fadeout
+        });
+
+        // cleanup
+        phaseOut.setOnFinished(e -> rootLayout.getChildren().remove(flashOverlay));
+
+        // Ignite the flash
+        phaseIn.play();
     }
 
     private void initAudio(String path) {
