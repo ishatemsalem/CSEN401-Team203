@@ -65,6 +65,90 @@ red (Ro):
 - ConveyorBelt
 - ContaminationSock
 
+### Milestone 2: 
+
+### Milestome 3: 
+
+Person 1 - blue - Jana
+
+“Player must be able to perform the following actions”
+Choose whether to activate powerup before rolling
+Roll dice to move monster
+
+“Player should keep track of the following throughout the game”
+Current turn
+Current player/opponent
+Dice result
+Drawn card display
+Freeze indication
+
+“Must be shown and updated for each card”
+Card name/effect
+Card effect indication
+
+“Must be shown for any invalid action”
+Exception popups
+Invalid action messages
+Prevent crashing
+Closing popup shouldn’t close game
+
+
+Person 2 - pink - Judy
+
+“Game board with all 100 cells...”
+100-cell board
+Correct positions/types
+Cell index numbers
+Different cell visuals
+Door energy
+Initial monster placement
+Card setup
+
+“Must be shown and updated on the board”
+Cell effects
+Activated/exhausted doors
+Monster cell identities
+Energy changes
+Shield blocking indication
+Updating monster positions
+
+
+Person 3 - green - Jana
+
+“Must be displayed for each monster”
+Name
+Original role
+Current role
+Type
+Energy
+Position
+Status effects
+
+“Must be shown and updated whenever a player ends a turn”
+Updated positions
+Updated energy
+Status durations
+Confusion role visuals
+
+"Player must be able to perform the following actions"
+Distinguish between monster types
+
+This person handles:
+
+Person 4 - yellow - Islam
+
+“Must be displayed whenever the player starts the game”
+Start screen
+Side selection
+Start game
+Instructions
+
+“Must be shown whenever a player wins”
+Game won screen
+Winner name/role
+Final energies
+Return to start window
+
 ### OOP guidelines:
 - All class instance variables must be explicitly declared as private.
 - Any attribute defined as a constant must be declared as public static final.
