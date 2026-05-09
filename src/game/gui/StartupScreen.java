@@ -125,7 +125,6 @@ public class StartupScreen {
                     }
                     
                     String currentText = script[currentIndex];
-                    currentText = currentText.replace(" ", "\u200A");
                     displayText.setText(currentText);
                     
                     // Anim logic:
