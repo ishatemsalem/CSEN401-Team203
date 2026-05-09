@@ -22,20 +22,17 @@ public class Main extends Application {
         rootLayout = new StackPane();
         mainScene = new Scene(rootLayout, 1280, 720);
         
-        // Initialize Audio (Place your audio file in an 'assets' folder at the root of your project)
+        // Initialize Audio 
         initAudio("assets/audio/lobby_theme.mp3");
 
-        // Load the Intro Screen first
-        StartupScreen intro = new StartupScreen(this::switchToLobby);
+        // Load the Intro Screen first, PASSING IN THE AUDIO PLAYER
+        StartupScreen intro = new StartupScreen(this::switchToLobby, backgroundMusic);
         rootLayout.getChildren().add(intro.getView());
 
         window.setScene(mainScene);
         window.show();
         
-        // Start the music and the intro sequence
-        if(backgroundMusic != null) {
-            backgroundMusic.play();
-        }
+        // Start the music and the intro sequence cleanly
         if (backgroundMusic != null) {
             backgroundMusic.setOnPlaying(() -> {
                 // This will only fire exactly when the audio hits the speakers
@@ -70,9 +67,6 @@ public class Main extends Application {
     }
 
     public void startGame(String selectedSide) {
-        // This is where you will eventually initialize your Game Engine,
-        // Board, and pass the selected side. 
-        // For now, it can just swap to a placeholder Game Screen.
         System.out.println("Starting game as: " + selectedSide);
     }
     
