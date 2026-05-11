@@ -60,7 +60,7 @@ public class Board {
 	}
 
 	
-	private Cell getCell(int index) {
+	public Cell getCell(int index) {
 		int[] pos = indexToRowCol(index);
 		return boardCells[pos[0]][pos[1]];
 	}

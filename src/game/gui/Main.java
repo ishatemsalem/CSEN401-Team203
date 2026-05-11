@@ -109,7 +109,39 @@ public class Main extends Application {
     }
 
     public void startGame(String selectedSide) {
+
         System.out.println("Starting game as: " + selectedSide);
+
+        // TEMPORARY BOARD TEST
+
+        BoardView boardView = new BoardView();
+
+        StackPane gameRoot = new StackPane();
+
+        gameRoot.setStyle("-fx-background-color: #111111;");
+
+        gameRoot.getChildren().add(boardView.getView());
+        
+        /*
+         * TODO:
+         * Replace these with REAL engine objects later
+         */
+
+        // Example temporary update calls
+        // Remove/comment if engine not ready yet
+
+        /*
+        Board board = new Board();
+
+        Monster player = new DasherMonster(...);
+        Monster opponent = new DynamoMonster(...);
+
+        boardView.updateBoard(board, player, opponent);
+        */
+
+        Scene gameScene = new Scene(gameRoot, 1280, 720);
+
+        window.setScene(gameScene);
     }
     
     public void showWinScreen(String winnerName, String role, int finalEnergy) {
