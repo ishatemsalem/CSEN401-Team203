@@ -13,6 +13,9 @@ public class Board {
 	private static ArrayList<Monster> stationedMonsters; 
 	private static ArrayList<Card> originalCards;
 	public static ArrayList<Card> cards;
+
+	/** Latest card drawn during the current {@link #moveMonster} (for GUI). Cleared when polled or on invalid move. */
+	private static Card uiLastDrawnCard;
 	
 	public Board(ArrayList<Card> readCards) {
 		this.boardCells = new Cell[Constants.BOARD_ROWS][Constants.BOARD_COLS];
@@ -124,6 +127,22 @@ public class Board {
 		return cards.remove(0);
 	}
 
+	/** Called from {@link CardCell} after a card is drawn so the GUI can show name/effect. */
+	public static void noteUiDrawnCard(Card card) {
+		uiLastDrawnCard = card;
+	}
+
+	/** Move snapshot to the game layer and clear; returns {@code null} if no card cell was hit. */
+	public static Card pollUiDrawnCard() {
+		Card c = uiLastDrawnCard;
+		uiLastDrawnCard = null;
+		return c;
+	}
+
+	public static void discardUiDrawnCard() {
+		uiLastDrawnCard = null;
+	}
+
 	public void moveMonster(Monster currentMonster, int roll, Monster opponentMonster) throws InvalidMoveException {
 	    Role oldRole = currentMonster.getRole();
 	    int oldPosition = currentMonster.getPosition();
@@ -134,6 +153,7 @@ public class Board {
 
 	    if (currentMonster.getPosition() == opponentMonster.getPosition()) {
 	        currentMonster.setPosition(oldPosition);
+	        discardUiDrawnCard();
 	        throw new InvalidMoveException("Cannot land on opponent!");
 	    }
 	    

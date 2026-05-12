@@ -8,22 +8,15 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 /**
- * CardDisplay — shows the card drawn when a monster lands on a Card Cell.
- *
- * Displays:
- *  - Card name (in yellow)
- *  - Card effect description (in white)
- *
- * Auto-hides after 3 seconds.
- * Hidden by default until showCard() is called.
+ * Card drawn on a card cell: name, description, and a short effect / lucky indication.
  */
 public class CardDisplay {
 
     private VBox  view;
     private Label nameLabel;
     private Label effectLabel;
+    private Label indicationLabel;
 
-    // ── Constructor ─────────────────────────────────────────────────────────
     public CardDisplay() {
 
         Label header = new Label("CARD DRAWN");
@@ -41,14 +34,25 @@ public class CardDisplay {
         );
 
         effectLabel = new Label("");
+        effectLabel.setWrapText(true);
+        effectLabel.setMaxWidth(260);
         effectLabel.setStyle(
             "-fx-text-fill: #ffffff;" +
             "-fx-font-size: 11px;"
         );
 
-        view = new VBox(3, header, nameLabel, effectLabel);
+        indicationLabel = new Label("");
+        indicationLabel.setWrapText(true);
+        indicationLabel.setMaxWidth(260);
+        indicationLabel.setStyle(
+            "-fx-text-fill: #b0bec5;" +
+            "-fx-font-size: 10px;" +
+            "-fx-font-style: italic;"
+        );
+
+        view = new VBox(4, header, nameLabel, effectLabel, indicationLabel);
         view.setAlignment(Pos.CENTER_LEFT);
-        view.setPadding(new Insets(7, 14, 7, 14));
+        view.setPadding(new Insets(8, 14, 8, 14));
         view.setStyle(
             "-fx-background-color: #2a2a3e;" +
             "-fx-background-radius: 8;" +
@@ -56,37 +60,40 @@ public class CardDisplay {
             "-fx-border-width: 1;" +
             "-fx-border-radius: 8;"
         );
-        view.setPrefWidth(190);
-
-        // Hidden until a card is drawn
+        view.setPrefWidth(280);
+        view.setMinWidth(200);
         view.setVisible(false);
     }
 
-    // ── PUBLIC API ───────────────────────────────────────────────────────────
-
-    /**
-     * Show the card box with the given name and effect.
-     * Auto-hides after 3 seconds.
-     *
-     * @param cardName  the card's name (e.g. "SwapperCard")
-     * @param effect    the card's description/effect text
-     */
-    public void showCard(String cardName, String effect) {
-        nameLabel.setText(cardName);
-        effectLabel.setText(effect);
+    /** @param lucky when {@code true}, shows a “lucky card” hint (from engine {@code Card#isLucky()}). */
+    public void showCard(String cardName, String effect, boolean lucky) {
+        nameLabel.setText(cardName != null ? cardName : "Card");
+        effectLabel.setText(effect != null && !effect.isEmpty() ? effect : "(No description)");
+        if (lucky) {
+            indicationLabel.setText("✦ Lucky card — higher rarity weight in the deck.");
+            indicationLabel.setStyle(
+                "-fx-text-fill: #ffd740;" +
+                "-fx-font-size: 10px;" +
+                "-fx-font-style: italic;"
+            );
+        } else {
+            indicationLabel.setText("Effect applied on landing this cell.");
+            indicationLabel.setStyle(
+                "-fx-text-fill: #90caf9;" +
+                "-fx-font-size: 10px;" +
+                "-fx-font-style: italic;"
+            );
+        }
         view.setVisible(true);
 
-        // Auto-hide after 3 seconds
-        PauseTransition pause = new PauseTransition(Duration.seconds(3));
+        PauseTransition pause = new PauseTransition(Duration.seconds(5));
         pause.setOnFinished(e -> view.setVisible(false));
         pause.play();
     }
 
-    /** Manually hide the card display. */
     public void hide() {
         view.setVisible(false);
     }
 
-    /** Returns the VBox node to embed in HUDPanel. */
     public VBox getView() { return view; }
 }

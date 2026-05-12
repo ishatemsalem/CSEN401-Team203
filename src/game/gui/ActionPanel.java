@@ -1,6 +1,7 @@
 package game.gui;
 
 import game.engine.Game;
+import game.engine.cards.Card;
 import game.engine.monsters.Monster;
 import game.engine.exceptions.InvalidMoveException;
 import game.engine.exceptions.OutOfEnergyException;
@@ -11,28 +12,17 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
 /**
- * ActionPanel — the left-side control panel the player interacts with each turn.
- *
- * Contains:
- *  - Power-Up toggle button (must be pressed BEFORE rolling)
- *  - Roll Dice button
- *  - Dice result label
- *
- * Guards:
- *  - Cannot roll twice in one turn
- *  - Cannot activate power-up after rolling
- *  - Cannot roll if frozen (engine skips turn automatically)
- *  - Power-up throws OutOfEnergyException if not enough energy
- *
- * All invalid actions show a popup via ExceptionHandler.
- * No popup closes the game.
+ * Left panel: optional power-up (armed before roll, applied when you roll), roll dice,
+ * dice readout. Invalid feedback uses {@link ExceptionHandler} toasts (non-blocking).
  */
 public class ActionPanel {
 
     private VBox    view;
     private Label   diceResultLabel;
+    private Label   hintLabel;
     private Button  rollButton;
     private Button  powerUpButton;
+    /** If true, {@link Game#usePowerup()} runs once at the start of the next roll (before the move). */
     private boolean powerUpActivated  = false;
     private boolean hasRolledThisTurn = false;
 
@@ -40,131 +30,136 @@ public class ActionPanel {
     private Game     game;
     private Main     mainApp;
 
-    // ── Constructor ─────────────────────────────────────────────────────────
     public ActionPanel(GameView gameView, Game game, Main mainApp) {
         this.gameView = gameView;
         this.game     = game;
         this.mainApp  = mainApp;
 
-        // ── Power-Up Button ──────────────────────────────────────────────────
-        powerUpButton = new Button("Activate Power-Up");
-        powerUpButton.setPrefWidth(190);
+        powerUpButton = new Button("Activate Power-Up (optional)");
+        powerUpButton.setPrefWidth(210);
         powerUpButton.setStyle(buttonStyle("#6a1b9a"));
         powerUpButton.setOnAction(e -> togglePowerUp());
 
-        // ── Roll Dice Button ─────────────────────────────────────────────────
-        rollButton = new Button("🎲  Roll Dice");
-        rollButton.setPrefWidth(190);
+        rollButton = new Button("Roll dice");
+        rollButton.setPrefWidth(210);
         rollButton.setStyle(buttonStyle("#1565c0"));
         rollButton.setOnAction(e -> onRollDice());
 
-        // ── Dice Result Label ────────────────────────────────────────────────
         diceResultLabel = new Label("Dice: —");
         diceResultLabel.setStyle(
             "-fx-text-fill: white;" +
-            "-fx-font-size: 26px;" +
+            "-fx-font-size: 24px;" +
             "-fx-font-weight: bold;"
         );
 
-        // ── Layout ───────────────────────────────────────────────────────────
-        view = new VBox(20, powerUpButton, rollButton, diceResultLabel);
+        hintLabel = new Label("Turn power-up ON if you want it, then roll.\nPower-up only applies before the dice move.");
+        hintLabel.setWrapText(true);
+        hintLabel.setMaxWidth(210);
+        hintLabel.setStyle("-fx-text-fill: #b0bec5; -fx-font-size: 11px;");
+
+        view = new VBox(14, powerUpButton, rollButton, diceResultLabel, hintLabel);
         view.setAlignment(Pos.CENTER);
-        view.setPadding(new Insets(24));
+        view.setPadding(new Insets(20, 16, 20, 16));
         view.setStyle("-fx-background-color: #1a1a2e;");
-        view.setPrefWidth(210);
+        view.setMinWidth(230);
+        view.setPrefWidth(240);
     }
 
-    // ── PRIVATE: POWER-UP TOGGLE ─────────────────────────────────────────────
-
     private void togglePowerUp() {
-
-        // Guard — cannot activate after rolling
         if (hasRolledThisTurn) {
             ExceptionHandler.showInvalidPowerUp();
             return;
         }
-
-        if (!powerUpActivated) {
-            // Try to activate via engine — throws OutOfEnergyException if < 500
-            try {
-                game.usePowerup();
-                powerUpActivated = true;
-                powerUpButton.setText("✔  Power-Up ON");
-                powerUpButton.setStyle(buttonStyle("#2e7d32")); // green = active
-                gameView.refreshAll(); // HUD energies after spending / effect
-            } catch (OutOfEnergyException e) {
-                ExceptionHandler.showNotEnoughEnergy();
-            }
+        powerUpActivated = !powerUpActivated;
+        if (powerUpActivated) {
+            powerUpButton.setText("Power-up: ON (uses when you roll)");
+            powerUpButton.setStyle(buttonStyle("#2e7d32"));
         } else {
-            // Deactivate (player changed their mind before rolling)
-            powerUpActivated = false;
-            powerUpButton.setText("Activate Power-Up");
-            powerUpButton.setStyle(buttonStyle("#6a1b9a")); // purple = inactive
-            gameView.refreshAll();
+            powerUpButton.setText("Activate Power-Up (optional)");
+            powerUpButton.setStyle(buttonStyle("#6a1b9a"));
         }
     }
 
-    // ── PRIVATE: ROLL DICE ───────────────────────────────────────────────────
-
     private void onRollDice() {
+        try {
+            onRollDiceImpl();
+        } catch (RuntimeException ex) {
+            ExceptionHandler.showGenericError(
+                "Unexpected problem during your turn.\n" + ex.getClass().getSimpleName() + ": " + ex.getMessage()
+            );
+            try {
+                hasRolledThisTurn = false;
+                rollButton.setDisable(false);
+                powerUpButton.setDisable(false);
+            } catch (RuntimeException ignored) {
+                // keep UI best-effort; never rethrow from handler
+            }
+        }
+    }
 
-        // Guard — cannot roll twice
+    private void onRollDiceImpl() {
         if (hasRolledThisTurn) {
             ExceptionHandler.showAlreadyRolled();
             return;
         }
 
-        // ── Frozen case ──────────────────────────────────────────────────────
-        // If current monster is frozen, engine skips the turn automatically
         if (game.getCurrent().isFrozen()) {
             gameView.getHUD().showFreezeAndHide();
             try {
-                game.playTurn(); // engine detects frozen → skips + unfreezes
+                game.playTurn();
             } catch (InvalidMoveException e) {
                 ExceptionHandler.showInvalidMove(e.getMessage());
             }
-            diceResultLabel.setText("Dice: — (frozen skip)");
+            diceResultLabel.setText("Dice: — (frozen)");
             gameView.refreshAll();
             gameView.getHUD().nextTurn();
-            gameView.getHUD().setCurrentPlayer(game.getCurrent().getName());
-            // No need to disable buttons — turn already switched
             return;
         }
 
-        // ── Normal roll ──────────────────────────────────────────────────────
+        if (powerUpActivated) {
+            try {
+                game.usePowerup();
+            } catch (OutOfEnergyException e) {
+                ExceptionHandler.showNotEnoughEnergy();
+                powerUpActivated = false;
+                powerUpButton.setText("Activate Power-Up (optional)");
+                powerUpButton.setStyle(buttonStyle("#6a1b9a"));
+                return;
+            }
+            powerUpActivated = false;
+            powerUpButton.setText("Activate Power-Up (optional)");
+            powerUpButton.setStyle(buttonStyle("#6a1b9a"));
+            gameView.refreshAll();
+        }
+
         hasRolledThisTurn = true;
         rollButton.setDisable(true);
-        powerUpButton.setDisable(true); // lock power-up after rolling
+        powerUpButton.setDisable(true);
 
         try {
-            game.playTurn(); // engine: rolls dice + moves + triggers cell effects
-
+            game.playTurn();
             diceResultLabel.setText("Dice: " + game.getLastRoll());
 
-            // ── Check if a card was drawn ────────────────────────────────────
-            // TODO: ask engine team for game.getLastDrawnCard() getter
-            // Card drawn = game.getLastDrawnCard();
-            // if (drawn != null) {
-            //     gameView.getHUD().getCardDisplay()
-            //             .showCard(drawn.getName(), drawn.getDescription());
-            // }
-
+            Card drawn = game.getLastDrawnCard();
+            if (drawn != null) {
+                gameView.getHUD().getCardDisplay().showCard(
+                    drawn.getName(),
+                    drawn.getDescription(),
+                    drawn.isLucky()
+                );
+                gameView.getHUD().setLastCardSummary(drawn.getName(), drawn.getDescription());
+            }
         } catch (InvalidMoveException e) {
-            // Engine reverts move automatically — just show popup
             ExceptionHandler.showInvalidMove(e.getMessage());
-            // Re-enable buttons so player can try again
             hasRolledThisTurn = false;
             rollButton.setDisable(false);
             powerUpButton.setDisable(false);
             return;
         }
 
-        // ── Sync board and HUD ───────────────────────────────────────────────
         gameView.refreshAll();
         gameView.getHUD().nextTurn();
-        gameView.getHUD().setCurrentPlayer(game.getCurrent().getName());
 
-        // ── Check win condition ──────────────────────────────────────────────
         Monster winner = game.getWinner();
         if (winner != null) {
             mainApp.showWinScreen(
@@ -175,35 +170,26 @@ public class ActionPanel {
             return;
         }
 
-        // Reset for the next player's turn
         resetForNewTurn();
     }
 
-    // ── PUBLIC: RESET BETWEEN TURNS ─────────────────────────────────────────
-
-    /**
-     * Call this at the start of each new turn to re-enable buttons
-     * and reset all per-turn state.
-     */
     public void resetForNewTurn() {
         hasRolledThisTurn = false;
         powerUpActivated  = false;
         rollButton.setDisable(false);
         powerUpButton.setDisable(false);
-        rollButton.setText("🎲  Roll Dice");
-        powerUpButton.setText("Activate Power-Up");
+        rollButton.setText("Roll dice");
+        powerUpButton.setText("Activate Power-Up (optional)");
         powerUpButton.setStyle(buttonStyle("#6a1b9a"));
         diceResultLabel.setText("Dice: —");
     }
 
-    /** Returns the VBox node to embed in GameView. */
     public VBox getView() { return view; }
 
-    // ── PRIVATE HELPERS ──────────────────────────────────────────────────────
     private String buttonStyle(String color) {
         return  "-fx-background-color: " + color + ";" +
                 "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
+                "-fx-font-size: 13px;" +
                 "-fx-font-weight: bold;" +
                 "-fx-background-radius: 6;" +
                 "-fx-cursor: hand;";

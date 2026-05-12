@@ -26,6 +26,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         this.window = primaryStage;
+        ExceptionHandler.setAlertOwner(primaryStage);
         this.window.setTitle("DooR DasH: Scare vs Laugh Touchdown");
         
         rootLayout = new StackPane();

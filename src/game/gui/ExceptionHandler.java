@@ -9,6 +9,8 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
@@ -18,8 +20,15 @@ import javafx.util.Duration;
 public final class ExceptionHandler {
 
     private static VBox toastColumn;
+    /** Owning window for fallback {@link Alert}s — dismissing the dialog never exits this stage. */
+    private static Stage alertOwner;
 
     private ExceptionHandler() {}
+
+    /** Call from {@link Main#start} so any blocking alert is a child of the game window. */
+    public static void setAlertOwner(Stage owner) {
+        alertOwner = owner;
+    }
 
     /** Call once per {@link GameView}; adds a non-interactive toast stack on top of the game. */
     public static void attachToGameLayer(StackPane gameLayerRoot) {
@@ -46,7 +55,7 @@ public final class ExceptionHandler {
     }
 
     public static void showInvalidMove(String reason) {
-        pushToast("warning", "Invalid move", reason.isEmpty() ? "That move is not allowed." : reason);
+        pushToast("warning", "Invalid action", reason.isEmpty() ? "That move is not allowed." : reason);
     }
 
     public static void showAlreadyRolled() {
@@ -78,6 +87,18 @@ public final class ExceptionHandler {
     }
 
     private static void pushToast(String kind, String title, String body) {
+        try {
+            pushToastImpl(kind, title, body);
+        } catch (RuntimeException ex) {
+            try {
+                showBlockingAlert(AlertType.WARNING, title, body);
+            } catch (RuntimeException ignored) {
+                // never let feedback crash the game
+            }
+        }
+    }
+
+    private static void pushToastImpl(String kind, String title, String body) {
         String full = title + ": " + body;
         if (!hasToastHost()) {
             showBlockingAlert(
@@ -123,6 +144,12 @@ public final class ExceptionHandler {
         Alert alert = new Alert(type, message, ButtonType.OK);
         alert.setTitle(title);
         alert.setHeaderText(null);
+        if (alertOwner != null) {
+            alert.initOwner(alertOwner);
+            alert.initModality(Modality.WINDOW_MODAL);
+        } else {
+            alert.initModality(Modality.APPLICATION_MODAL);
+        }
         alert.showAndWait();
     }
 }

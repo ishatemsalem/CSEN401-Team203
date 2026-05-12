@@ -47,21 +47,28 @@ public class GameView {
     }
 
     public void refreshAll() {
-        boardView.updateBoard(
-            game.getBoard(),
-            game.getPlayer(),
-            game.getOpponent()
-        );
+        try {
+            boardView.updateBoard(
+                game.getBoard(),
+                game.getPlayer(),
+                game.getOpponent()
+            );
 
-        Monster current = game.getCurrent();
-        Monster player = game.getPlayer();
-        Monster opponent = game.getOpponent();
-        hudPanel.setCurrentPlayer(current.getName());
-        hudPanel.setFrozen(current.isFrozen());
-        hudPanel.setScores(
-            player.getName(), player.getEnergy(), player.getPosition(),
-            opponent.getName(), opponent.getEnergy(), opponent.getPosition()
-        );
+            Monster current = game.getCurrent();
+            Monster player = game.getPlayer();
+            Monster opponent = game.getOpponent();
+            hudPanel.setTurnContext(current, player, opponent);
+            hudPanel.setFrozen(current.isFrozen());
+            hudPanel.setScores(
+                player.getName(), player.getEnergy(), player.getPosition(),
+                opponent.getName(), opponent.getEnergy(), opponent.getPosition(),
+                game.getLastRoll()
+            );
+        } catch (RuntimeException ex) {
+            ExceptionHandler.showGenericError(
+                "Could not refresh the board or HUD.\n" + ex.getClass().getSimpleName() + ": " + ex.getMessage()
+            );
+        }
     }
 
     public StackPane getView()      { return layerRoot; }
