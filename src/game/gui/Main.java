@@ -38,6 +38,8 @@ public class Main extends Application {
         rootLayout.getChildren().add(intro.getView());
         
         window.setScene(mainScene);
+        window.setMinWidth(1100);
+        window.setMinHeight(700);
         window.show();
         
         // Start the music and the intro sequence

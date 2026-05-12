@@ -5,34 +5,27 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.util.Duration;
 
 /**
- * HUDPanel — the top info bar displayed across the game screen.
- *
- * Displays:
- *  - Current turn number
- *  - Current player name (whose turn it is)
- *  - Card drawn (name + effect) — auto-hides after 3 seconds
- *  - Freeze indicator — auto-hides after 2 seconds
+ * Top bar: turn, current player, energies/positions, card strip, freeze hint.
  */
 public class HUDPanel {
 
     private HBox         view;
     private Label        turnLabel;
     private Label        playerLabel;
+    private Label        scoresLabel;
     private Label        freezeLabel;
     private CardDisplay  cardDisplay;
 
     private int turnCount = 1;
 
-    // ── Constructor ─────────────────────────────────────────────────────────
     public HUDPanel() {
-
-        // Turn counter label
         turnLabel = styledLabel("Turn: 1");
 
-        // Current player label
         playerLabel = styledLabel("▶  Loading...");
         playerLabel.setStyle(
             "-fx-text-fill: #00e5ff;" +
@@ -40,59 +33,70 @@ public class HUDPanel {
             "-fx-font-weight: bold;"
         );
 
-        // Freeze indicator — hidden by default
-        freezeLabel = new Label("❄  FROZEN — TURN SKIPPED");
+        scoresLabel = styledLabel("Energy —  |  Pos —");
+        scoresLabel.setStyle(
+            "-fx-text-fill: #ffe57f;" +
+            "-fx-font-size: 13px;" +
+            "-fx-font-weight: bold;"
+        );
+
+        freezeLabel = new Label("❄  FROZEN");
         freezeLabel.setStyle(
             "-fx-text-fill: white;" +
             "-fx-background-color: #0077b6;" +
-            "-fx-font-size: 14px;" +
+            "-fx-font-size: 13px;" +
             "-fx-font-weight: bold;" +
-            "-fx-padding: 6 16 6 16;" +
+            "-fx-padding: 6 12 6 12;" +
             "-fx-background-radius: 6;"
         );
         freezeLabel.setVisible(false);
 
-        // Card display box
         cardDisplay = new CardDisplay();
 
-        // Assemble into a horizontal bar
-        view = new HBox(30,
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        view = new HBox(16,
             turnLabel,
             playerLabel,
+            scoresLabel,
+            spacer,
             cardDisplay.getView(),
             freezeLabel
         );
         view.setAlignment(Pos.CENTER_LEFT);
-        view.setPadding(new Insets(10, 24, 10, 24));
-        view.setStyle("-fx-background-color: #1e1e2e;");
-        view.setMinHeight(60);
+        view.setPadding(new Insets(10, 16, 10, 16));
+        view.setStyle("-fx-background-color: #1e1e2e; -fx-border-color: #333855; -fx-border-width: 0 0 2 0;");
+        view.setMinHeight(72);
+        view.setMaxHeight(72);
     }
 
-    // ── PUBLIC UPDATE METHODS ─────────────────────────────────────────────────
-
-    /** Increment turn counter and update the label. */
     public void nextTurn() {
         turnCount++;
         turnLabel.setText("Turn: " + turnCount);
     }
 
-    /** Show whose turn it currently is. */
     public void setCurrentPlayer(String name) {
         playerLabel.setText("▶  " + name + "'s Turn");
     }
 
     /**
-     * Show or hide the frozen indicator.
-     * When shown, auto-hides after 2 seconds.
+     * Live score line: both monsters' energy and board index (0–99).
      */
+    public void setScores(String pName, int pEnergy, int pPos,
+                          String oName, int oEnergy, int oPos) {
+        String shortP = shorten(pName, 14);
+        String shortO = shorten(oName, 14);
+        scoresLabel.setText(
+            shortP + ": " + pEnergy + " (cell " + pPos + ")   |   " +
+            shortO + ": " + oEnergy + " (cell " + oPos + ")"
+        );
+    }
+
     public void setFrozen(boolean frozen) {
         freezeLabel.setVisible(frozen);
     }
 
-    /**
-     * Flash the ❄ FROZEN banner for 2 seconds then hide it.
-     * Call this when a frozen monster's turn is skipped.
-     */
     public void showFreezeAndHide() {
         freezeLabel.setVisible(true);
         PauseTransition pause = new PauseTransition(Duration.seconds(2));
@@ -100,19 +104,18 @@ public class HUDPanel {
         pause.play();
     }
 
-    /** Returns the CardDisplay so ActionPanel can trigger it after a card is drawn. */
     public CardDisplay getCardDisplay() { return cardDisplay; }
-
-    /** Returns the current turn number. */
     public int getTurnCount() { return turnCount; }
-
-    /** Returns the root HBox node to embed in the scene. */
     public HBox getView() { return view; }
 
-    // ── PRIVATE HELPERS ──────────────────────────────────────────────────────
+    private static String shorten(String s, int max) {
+        if (s == null) return "?";
+        return s.length() <= max ? s : s.substring(0, max - 1) + "…";
+    }
+
     private Label styledLabel(String text) {
         Label l = new Label(text);
-        l.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
+        l.setStyle("-fx-text-fill: #eceff1; -fx-font-size: 14px;");
         return l;
     }
 }

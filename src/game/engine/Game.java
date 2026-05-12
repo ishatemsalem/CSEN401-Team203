@@ -16,6 +16,7 @@ public class Game {
 	private Monster player;
 	private Monster opponent;
 	private Monster current;
+	private int lastRoll;
 	
 	public Game(Role playerRole) throws IOException {
 		this.board = new Board(DataLoader.readCards());
@@ -56,6 +57,11 @@ public class Game {
 	public void setCurrent(Monster current) {
 		this.current = current;
 	}
+
+	/** Last dice value from {@link #playTurn()} (1–6). Not updated when a turn is skipped as frozen. */
+	public int getLastRoll() {
+		return lastRoll;
+	}
 	
 	private Monster selectRandomMonsterByRole(Role role) {
 		Collections.shuffle(allMonsters);
@@ -91,7 +97,8 @@ public class Game {
 		}
 		
 		int roll = rollDice();
-		
+		lastRoll = roll;
+
 		board.moveMonster(current, roll, getCurrentOpponent());
 		
 		switchTurn();

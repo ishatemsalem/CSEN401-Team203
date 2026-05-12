@@ -91,6 +91,7 @@ public class ActionPanel {
                 powerUpActivated = true;
                 powerUpButton.setText("✔  Power-Up ON");
                 powerUpButton.setStyle(buttonStyle("#2e7d32")); // green = active
+                gameView.refreshAll(); // HUD energies after spending / effect
             } catch (OutOfEnergyException e) {
                 ExceptionHandler.showNotEnoughEnergy();
             }
@@ -99,6 +100,7 @@ public class ActionPanel {
             powerUpActivated = false;
             powerUpButton.setText("Activate Power-Up");
             powerUpButton.setStyle(buttonStyle("#6a1b9a")); // purple = inactive
+            gameView.refreshAll();
         }
     }
 
@@ -121,6 +123,7 @@ public class ActionPanel {
             } catch (InvalidMoveException e) {
                 ExceptionHandler.showInvalidMove(e.getMessage());
             }
+            diceResultLabel.setText("Dice: — (frozen skip)");
             gameView.refreshAll();
             gameView.getHUD().nextTurn();
             gameView.getHUD().setCurrentPlayer(game.getCurrent().getName());
@@ -136,10 +139,7 @@ public class ActionPanel {
         try {
             game.playTurn(); // engine: rolls dice + moves + triggers cell effects
 
-            // ── Update dice result display ───────────────────────────────────
-            // TODO: ask engine team for game.getLastRoll() getter
-            // diceResultLabel.setText("Dice: " + game.getLastRoll());
-            diceResultLabel.setText("Dice: rolled!"); // placeholder until getter exists
+            diceResultLabel.setText("Dice: " + game.getLastRoll());
 
             // ── Check if a card was drawn ────────────────────────────────────
             // TODO: ask engine team for game.getLastDrawnCard() getter

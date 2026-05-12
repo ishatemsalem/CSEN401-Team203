@@ -7,12 +7,14 @@ import javafx.geometry.Pos;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 
 
 public class BoardView {
 
     // ── Visual sizing constants (tweak freely) ──────────────────────────────
-    private static final int CELL_SIZE   = 70;   // px per cell (width & height)
+    /** Sized so 10×10 grid + HUD fits in 720px height without overlapping side/top bars. */
+    private static final int CELL_SIZE   = 56;
     private static final int GRID_COLS   = 10;
     private static final int GRID_ROWS   = 10;
  
@@ -44,7 +46,11 @@ public class BoardView {
         wrapper = new StackPane(gridPane);
         wrapper.setAlignment(Pos.CENTER);
         wrapper.setStyle("-fx-background-color: #121212;");
-        wrapper.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        // Keep board paint inside the BorderPane center slot (was overflowing and covering HUD / actions).
+        Rectangle clip = new Rectangle();
+        clip.widthProperty().bind(wrapper.widthProperty());
+        clip.heightProperty().bind(wrapper.heightProperty());
+        wrapper.setClip(clip);
     }
  
     // ────────────────────────────────────────────────────────────────────────
