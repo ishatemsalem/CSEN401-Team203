@@ -19,7 +19,7 @@ public class Main extends Application {
     private Scene mainScene;
     private StackPane rootLayout;
 
-    @Override
+@Override
     public void start(Stage primaryStage) {
         this.window = primaryStage;
         this.window.setTitle("DooR DasH: Scare vs Laugh Touchdown");
@@ -29,24 +29,40 @@ public class Main extends Application {
         
         initAudio("assets/audio/lobby_theme.mp3");
 
+        /* --- COMMENTED OUT FOR DEBUGGING --- *.
+        /* */
         // Load intro screen first, PASSING IN AUDIO PLAYER
         StartupScreen intro = new StartupScreen(this::triggerFlashbangTransition, backgroundMusic);
         rootLayout.getChildren().add(intro.getView());
+        /**/
+
+        // --- DEBUG OVERRIDE: LOAD DIRECTLY TO LOBBY ---
+        /*
+        switchToLobby();
+        */
         
         window.setScene(mainScene);
+        window.setMinWidth(1100);
+        window.setMinHeight(700);
         window.show();
         
-        // Start the music and the intro sequence
+        // Start the music directly without waiting for the intro sequence
         if (backgroundMusic != null) {
+            /* --- COMMENTED OUT FOR DEBUGGING --- */
+            
             backgroundMusic.setOnPlaying(() -> {
                 // for sync purposes
                 intro.startSequence(); 
             });
+            /**/
             backgroundMusic.play();
-        } else {
+        } 
+        /* --- COMMENTED OUT FOR DEBUGGING --- */
+        else {
             // justincase the audio file is missing
             intro.startSequence();
         }
+        /* */
     }
 
     private void triggerFlashbangTransition() {
