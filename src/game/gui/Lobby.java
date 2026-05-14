@@ -10,6 +10,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
+import javafx.scene.media.AudioClip;
 
 import java.io.File;
 
@@ -28,14 +29,28 @@ public class Lobby {
     private ImageView selectedSign;
     private Label scarerArrow;
     private Label laugherArrow;
+    private ImageView startGameBtn;
 
     // Audio states
     private boolean musicOn = true;
     private boolean sfxOn = true;
+    private AudioClip hoverSound;
+    private AudioClip clickSound;
 
     public Lobby(Main mainApp) {
         this.mainApp = mainApp;
         this.view = new Pane(); 
+
+        this.mainApp = mainApp;
+        this.view = new Pane(); 
+
+        // Load SFX once into memory to prevent freezing
+        try {
+            hoverSound = new AudioClip(new File("assets/audio/hover.mp3").toURI().toString());
+            clickSound = new AudioClip(new File("assets/audio/click.mp3").toURI().toString());
+        } catch (Exception e) {
+            System.out.println("SFX files missing, buttons will be silent.");
+        }
 
         // 1. Load Background (Crop to Fill)
         try {
@@ -49,22 +64,22 @@ public class Lobby {
         }
 
         // 2. Build the Platform Anchors (Monsters locked to platforms)
-        scarerNode = createAnchorContainer(0.15, 0.145, 0.2075);
+        scarerNode = createAnchorContainer(0.125, 0.145, 0.205);
         ImageView scarerPlatform = createAnchoredImage("assets/lobby/platform_scarer.png", scarerNode, 0.0, 0.65, 1.03);
         ImageView scarerMonster = createAnchoredImage("assets/lobby/monster_scarer.png", scarerNode, 0.1, 0.03, 0.7);
         scarerNode.getChildren().addAll(scarerPlatform, scarerMonster);
 
-        laugherNode = createAnchorContainer(0.38, 0.23, 0.215);
+        laugherNode = createAnchorContainer(0.35, 0.23, 0.21);
         ImageView laugherPlatform = createAnchoredImage("assets/lobby/platform_laugher.png", laugherNode, 0.0, 0.4, 1.025);
         ImageView laugherMonster = createAnchoredImage("assets/lobby/monster_laugher.png", laugherNode, 0.1, 0.3, 0.71);
         laugherNode.getChildren().addAll(laugherPlatform, laugherMonster);
 
         // Apply distinct ColorAdjust to the ENTIRE container (Darkens platform AND monster together)
-        scarerNode.setEffect(new ColorAdjust(0, 0, -0.4, 0));
-        laugherNode.setEffect(new ColorAdjust(0, 0, -0.4, 0));
+        scarerNode.setEffect(new ColorAdjust(0, 0, 0, 0));
+        laugherNode.setEffect(new ColorAdjust(0, 0, 0, 0));
 
         // 3. Build the Main Board Anchor (Buttons locked to board)
-        Pane boardNode = createAnchorContainer(0.65, 0.375, 0.29);
+        Pane boardNode = createAnchorContainer(0.625, 0.375, 0.265);
         ImageView mainBoard = createAnchoredImage("assets/lobby/main_board.png", boardNode, 0.0, 0.0, 1.0);
         
         // These placeholders (0.2, 0.3, etc.) are now % relative to the BOARD, not the screen
@@ -78,6 +93,8 @@ public class Lobby {
         applyButtonHoverPress(musicBtn);
         applyButtonHoverPress(sfxBtn);
 
+        
+
         musicBtn.setOnMouseClicked(e -> toggleAudio(musicBtn, "music"));
         sfxBtn.setOnMouseClicked(e -> toggleAudio(sfxBtn, "sfx"));
 
@@ -87,8 +104,22 @@ public class Lobby {
         ImageView topSign = createBoundImage("assets/lobby/top_sign.png", 0.25, 0.05, 0.47);
         
         // START button is explicitly bound to the viewport, fully separated from the board
-        ImageView startGameBtn = createBoundImage("assets/lobby/btn_start.png", 0.765, 0.1, 0.135);
+        startGameBtn = createBoundImage("assets/lobby/btn_start.png", 0.765, 0.1, 0.145);
         applyButtonHoverPress(startGameBtn);
+        // Now Grey it out and disable it initially
+        ColorAdjust startBtnEffect = (ColorAdjust) startGameBtn.getEffect();
+        startBtnEffect.setSaturation(-0.1);  // Makes it grayscale
+        startBtnEffect.setBrightness(-0.5);  // Darkens it
+        startGameBtn.setDisable(true);       // Prevents clicks and hover animations
+
+        // Add the action to switch to the GameView
+        startGameBtn.setOnMouseClicked(e -> {
+            if (selectedRole != 0) {
+                String side = (selectedRole == 1) ? "Scarer" : "Laugher";
+                mainApp.startGame(side);
+            }
+        });
+
 
         selectedSign = createBoundImage("assets/lobby/sign_selected.png", 0, 0, 0.1);
         selectedSign.setVisible(false);
@@ -128,7 +159,7 @@ public class Lobby {
         bottomText.setAlignment(Pos.CENTER);
         
         bottomText.layoutXProperty().bind(view.widthProperty().subtract(bottomText.widthProperty()).divide(2));
-        bottomText.layoutYProperty().bind(view.heightProperty().multiply(0.95));
+        bottomText.layoutYProperty().bind(view.heightProperty().multiply(0.85));
 
         setupSemiBlinkAnimation(bottomText);
         view.getChildren().add(bottomText);
@@ -196,6 +227,9 @@ public class Lobby {
         btn.setOnMouseEntered(e -> {
             btn.setScaleX(1.05);
             btn.setScaleY(1.05);
+            if (sfxOn && hoverSound != null) {
+                hoverSound.play();
+            }
         });
         btn.setOnMouseExited(e -> {
             btn.setScaleX(1.0);
@@ -205,6 +239,9 @@ public class Lobby {
             btn.setScaleX(0.95);
             btn.setScaleY(0.95);
             colorAdjust.setBrightness(-0.2);
+            if (sfxOn && clickSound != null) {
+                clickSound.play();
+            }
         });
         btn.setOnMouseReleased(e -> {
             btn.setScaleX(1.05); 
@@ -254,6 +291,11 @@ public class Lobby {
     private void selectRole(int roleId) {
         selectedRole = roleId;
 
+        startGameBtn.setDisable(false);
+        ColorAdjust startBtnEffect = (ColorAdjust) startGameBtn.getEffect();
+        startBtnEffect.setSaturation(0.0);
+        startBtnEffect.setBrightness(0.0);
+
         scarerArrow.setVisible(false);
         laugherArrow.setVisible(false);
 
@@ -290,7 +332,7 @@ public class Lobby {
         
         // Anchor the arrow dynamically above the respective container
         arrow.layoutXProperty().bind(targetNode.layoutXProperty().add(targetNode.prefWidthProperty().divide(2.5)));
-        arrow.layoutYProperty().bind(targetNode.layoutYProperty().subtract(40));
+        arrow.layoutYProperty().bind(targetNode.layoutYProperty().subtract(25));
 
         TranslateTransition bounce = new TranslateTransition(Duration.seconds(0.8), arrow);
         bounce.setByY(-15);
@@ -313,14 +355,28 @@ public class Lobby {
     }
 
     private void toggleAudio(ImageView btn, String type) {
-        if (type.equals("music")) {
-            musicOn = !musicOn;
-            String path = musicOn ? "assets/lobby/btn_music_on.png" : "assets/lobby/btn_music_off.png";
-            try { btn.setImage(new Image(new File(path).toURI().toString())); } catch (Exception e) {}
-        } else {
-            sfxOn = !sfxOn;
-            String path = sfxOn ? "assets/lobby/btn_sfx_on.png" : "assets/lobby/btn_sfx_off.png";
-            try { btn.setImage(new Image(new File(path).toURI().toString())); } catch (Exception e) {}
-        }
+    if (type.equals("music")) {
+        musicOn = !musicOn;
+        mainApp.setMusicMuted(!musicOn); // <--- Tell Main to mute/unmute
+        String path = musicOn ? "assets/lobby/btn_music_on.png" : "assets/lobby/btn_music_off.png";
+        try { btn.setImage(new Image(new File(path).toURI().toString())); } catch (Exception e) {}
+    } else {
+        sfxOn = !sfxOn;
+        mainApp.setSfxMuted(!sfxOn);     // <--- Tell Main to mute/unmute SFX globally
+        String path = sfxOn ? "assets/lobby/btn_sfx_on.png" : "assets/lobby/btn_sfx_off.png";
+        try { btn.setImage(new Image(new File(path).toURI().toString())); } catch (Exception e) {}
     }
+}
+
+    private void playSFX(String relativePath) {
+    if (!sfxOn) return; // Don't play if muted
+    try {
+        AudioClip clip = new AudioClip(new File(relativePath).toURI().toString());
+        clip.play();
+    } catch (Exception e) {
+        // Silently fail if placeholder audio files aren't created yet
+    }
+}
+    
+
 }

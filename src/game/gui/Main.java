@@ -70,6 +70,22 @@ public class Main extends Application {
         /* */
     }
 
+    private boolean sfxMuted = false;
+
+    public void setMusicMuted(boolean mute) {
+        if (backgroundMusic != null) {
+            backgroundMusic.setMute(mute);
+        }
+    }
+
+    public void setSfxMuted(boolean mute) {
+        this.sfxMuted = mute;
+    }
+
+    public boolean isSfxMuted() {
+        return sfxMuted;
+    }
+
     private void triggerFlashbangTransition() {
         //whitebox
         Rectangle flashOverlay = new Rectangle(1280, 720, Color.WHITE);
