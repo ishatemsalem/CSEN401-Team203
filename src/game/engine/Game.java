@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
+import game.engine.cards.Card;
 import game.engine.dataloader.DataLoader;
 import game.engine.exceptions.InvalidMoveException;
 import game.engine.exceptions.OutOfEnergyException;
@@ -16,6 +17,8 @@ public class Game {
 	private Monster player;
 	private Monster opponent;
 	private Monster current;
+	private int lastRoll;
+	private Card lastDrawnCard;
 	
 	public Game(Role playerRole) throws IOException {
 		this.board = new Board(DataLoader.readCards());
@@ -56,6 +59,16 @@ public class Game {
 	public void setCurrent(Monster current) {
 		this.current = current;
 	}
+
+	/** Last dice value from {@link #playTurn()} (1–6). Not updated when a turn is skipped as frozen. */
+	public int getLastRoll() {
+		return lastRoll;
+	}
+
+	/** Card drawn on the last completed {@link #playTurn()} from a card cell, or {@code null}. */
+	public Card getLastDrawnCard() {
+		return lastDrawnCard;
+	}
 	
 	private Monster selectRandomMonsterByRole(Role role) {
 		Collections.shuffle(allMonsters);
@@ -83,6 +96,7 @@ public class Game {
 	}
 	
 	public void playTurn() throws InvalidMoveException {
+		lastDrawnCard = null;
 		if (current.isFrozen()) {
 			System.out.println(current.getName() + " is frozen! Turn skipped.");
 			current.setFrozen(false);
@@ -91,8 +105,15 @@ public class Game {
 		}
 		
 		int roll = rollDice();
-		
-		board.moveMonster(current, roll, getCurrentOpponent());
+		lastRoll = roll;
+
+		try {
+			board.moveMonster(current, roll, getCurrentOpponent());
+			lastDrawnCard = Board.pollUiDrawnCard();
+		} catch (InvalidMoveException e) {
+			Board.discardUiDrawnCard();
+			throw e;
+		}
 		
 		switchTurn();
 	}

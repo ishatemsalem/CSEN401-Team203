@@ -11,7 +11,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import java.io.File;
+import java.io.IOException;
 import javafx.util.Duration;
+
+import game.engine.Game;
+import game.engine.Role;
 
 public class Main extends Application {
     private Stage window;
@@ -22,6 +26,7 @@ public class Main extends Application {
 @Override
     public void start(Stage primaryStage) {
         this.window = primaryStage;
+        ExceptionHandler.setAlertOwner(primaryStage);
         this.window.setTitle("DooR DasH: Scare vs Laugh Touchdown");
         
         rootLayout = new StackPane();
@@ -125,39 +130,25 @@ public class Main extends Application {
     }
 
     public void startGame(String selectedSide) {
+        Role playerRole = roleFromLobbyChoice(selectedSide);
+        try {
+            Game game = new Game(playerRole);
+            GameView gameView = new GameView(game, this);
+            rootLayout.getChildren().setAll(gameView.getView());
+            window.setScene(mainScene);
+        } catch (IOException e) {
+            ExceptionHandler.showGenericError(
+                "Could not load game data (CSV files).\n" + e.getMessage()
+            );
+        }
+    }
 
-        System.out.println("Starting game as: " + selectedSide);
-
-        // TEMPORARY BOARD TEST
-
-        BoardView boardView = new BoardView();
-
-        StackPane gameRoot = new StackPane();
-
-        gameRoot.setStyle("-fx-background-color: #111111;");
-
-        gameRoot.getChildren().add(boardView.getView());
-        
-        /*
-         * TODO:
-         * Replace these with REAL engine objects later
-         */
-
-        // Example temporary update calls
-        // Remove/comment if engine not ready yet
-
-        /*
-        Board board = new Board();
-
-        Monster player = new DasherMonster(...);
-        Monster opponent = new DynamoMonster(...);
-
-        boardView.updateBoard(board, player, opponent);
-        */
-
-        Scene gameScene = new Scene(gameRoot, 1280, 720);
-
-        window.setScene(gameScene);
+    /** Maps lobby combo text to engine {@link Role}. */
+    private static Role roleFromLobbyChoice(String selectedSide) {
+        if (selectedSide != null && selectedSide.toLowerCase().contains("laugh")) {
+            return Role.LAUGHER;
+        }
+        return Role.SCARER;
     }
     
     public void showWinScreen(String winnerName, String role, int finalEnergy) {

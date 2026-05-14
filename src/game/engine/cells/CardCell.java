@@ -15,6 +15,7 @@ public class CardCell extends Cell {
     	super.onLand(landingMonster, opponentMonster);
     	
         Card card = Board.drawCard();
+        Board.noteUiDrawnCard(card);
         card.performAction(landingMonster, opponentMonster);
     }
    
