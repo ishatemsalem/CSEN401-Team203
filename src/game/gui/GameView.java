@@ -5,6 +5,7 @@ import game.engine.monsters.Monster;
 import javafx.geometry.Insets;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 
 /**
  * GameView — full play screen: HUD (top), actions (left), board (center),
@@ -18,6 +19,8 @@ public class GameView {
     private final HUDPanel   hudPanel;
     private final ActionPanel actionPanel;
     private final Game       game;
+    private final MonsterInfo Info1;
+    private final MonsterInfo Info2;
 
     public GameView(Game game, Main mainApp) {
         this.game = game;
@@ -43,6 +46,12 @@ public class GameView {
         layerRoot.getChildren().add(gamePane);
         ExceptionHandler.attachToGameLayer(layerRoot);
 
+        Info1 = new MonsterInfo("YOU", "#00e5ff");
+        Info2 = new MonsterInfo("OPPONENT", "#ff1744");
+        VBox rightSidebar = new VBox(20, Info1.getView(), Info2.getView());
+        rightSidebar.setPadding(new Insets(10));
+        gamePane.setRight(rightSidebar);
+        
         refreshAll();
     }
 
@@ -60,10 +69,13 @@ public class GameView {
             hudPanel.setTurnContext(current, player, opponent);
             hudPanel.setFrozen(current.isFrozen());
             hudPanel.setScores(
-                player.getName(), player.getEnergy(), player.getPosition(),
+            player.getName(), player.getEnergy(), player.getPosition(),
                 opponent.getName(), opponent.getEnergy(), opponent.getPosition(),
                 game.getLastRoll()
             );
+            Info1.refresh(game.getPlayer());
+            Info2.refresh(game.getOpponent());
+            
         } catch (RuntimeException ex) {
             ExceptionHandler.showGenericError(
                 "Could not refresh the board or HUD.\n" + ex.getClass().getSimpleName() + ": " + ex.getMessage()
