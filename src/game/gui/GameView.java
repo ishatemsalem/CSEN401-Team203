@@ -27,7 +27,7 @@ public class GameView {
         actionPanel = new ActionPanel(this, game, mainApp);
 
         gamePane = new BorderPane();
-        gamePane.setStyle("-fx-background-color: #111111;");
+        gamePane.setStyle("-fx-background-color: transparent;");
 
         gamePane.setTop(hudPanel.getView());
         gamePane.setLeft(actionPanel.getView());

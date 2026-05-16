@@ -8,66 +8,109 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
-
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import java.io.File;
 
 public class BoardView {
 
-    // ── Visual sizing constants (tweak freely) ──────────────────────────────
-    /** Sized so 10×10 grid + HUD fits in 720px height without overlapping side/top bars. */
-    private static final int CELL_SIZE   = 56;
-    private static final int GRID_COLS   = 10;
-    private static final int GRID_ROWS   = 10;
+    private static final int GRID_COLS = 10;
+    private static final int GRID_ROWS = 10;
  
+    private static final String COLOR_PLAYER_TOKEN   = "#00e5ff"; 
+    private static final String COLOR_OPPONENT_TOKEN = "#ff1744"; 
  
-    // ── Monster token colours ───────────────────────────────────────────────
-    private static final String COLOR_PLAYER_TOKEN   = "#00e5ff"; // cyan
-    private static final String COLOR_OPPONENT_TOKEN = "#ff1744"; // hot-red
- 
-    // ── Internal state ──────────────────────────────────────────────────────
     private final StackPane wrapper;  
+    private final StackPane boardAnchor; // Locks the grid and image together
     private final GridPane gridPane;
     private final CellView[][] cellViews = new CellView[GRID_ROWS][GRID_COLS];
  
-    // Keep references to the two monster tokens so we can move them around
     private Circle playerToken;
     private Circle opponentToken;
  
-    // ── Constructor ─────────────────────────────────────────────────────────
     public BoardView() {
+        // 1. The outermost wrapper (Full screen area given by GameView)
+        wrapper = new StackPane();
+        wrapper.setAlignment(Pos.CENTER);
+        
+        // Load the room background (Fallback to dark gray if missing)
+        try {
+            Image bgImage = new Image(new File("assets/lobby/lobby_bg.png").toURI().toString());
+            BackgroundSize coverSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, false, true);
+            wrapper.setBackground(new Background(new BackgroundImage(bgImage, BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER, coverSize)));
+        } catch (Exception e) {
+            wrapper.setStyle("-fx-background-color: #121212;");
+        }
+
+        // 2. The Anchor Container (Maintains 5:4 ratio, 90% of screen height)
+        boardAnchor = new StackPane();
+        boardAnchor.setAlignment(Pos.CENTER);
+        
+        // Bind the anchor's height to 90% of the wrapper (leaving 5% top and bottom)
+        boardAnchor.maxHeightProperty().bind(wrapper.heightProperty().multiply(0.9));
+        // Force the 5:4 Width-to-Height ratio (5 / 4 = 1.25)
+        boardAnchor.maxWidthProperty().bind(boardAnchor.maxHeightProperty().multiply(1.25));
+
+        // 3. The Board Image (Matches the Anchor exactly)
+        ImageView boardImage = new ImageView();
+        try {
+            boardImage.setImage(new Image(new File("assets/tex/board.png").toURI().toString()));
+        } catch (Exception e) {
+            System.out.println("Board texture missing.");
+        }
+
+        // FIX: Force JavaFX to respect the original image pixels
+        boardImage.setPreserveRatio(true); 
+
+        // FIX: Only bind the height. Let preserveRatio handle the width naturally!
+        boardImage.fitHeightProperty().bind(boardAnchor.maxHeightProperty().multiply(0.9));
+        
+        // 4. The Grid (Transparent, overlaying the image perfectly)
         gridPane = new GridPane();
-        gridPane.setHgap(2);
-        gridPane.setVgap(2);
-        gridPane.setStyle("-fx-background-color: #1c1c1c; -fx-padding: 8;");
- 
+        gridPane.setStyle("-fx-background-color: transparent;");
+        
+        // Force cells to be exactly 10% of the board's width and height
+        for (int i = 0; i < GRID_COLS; i++) {
+            ColumnConstraints col = new ColumnConstraints();
+            col.setPercentWidth(10);
+            gridPane.getColumnConstraints().add(col);
+            
+            RowConstraints row = new RowConstraints();
+            row.setPercentHeight(10);
+            gridPane.getRowConstraints().add(row);
+        }
+
         buildEmptyGrid();
         initMonsterTokens();
-        
-     // wrap the grid so it centers inside whatever scene it's placed in
-        wrapper = new StackPane(gridPane);
-        wrapper.setAlignment(Pos.CENTER);
-        wrapper.setStyle("-fx-background-color: #121212;");
-        // Keep board paint inside the BorderPane center slot (was overflowing and covering HUD / actions).
+
+        // Stack the image, then the invisible grid of cells on top
+        boardAnchor.getChildren().addAll(boardImage, gridPane);
+        wrapper.getChildren().add(boardAnchor);
+
         Rectangle clip = new Rectangle();
         clip.widthProperty().bind(wrapper.widthProperty());
         clip.heightProperty().bind(wrapper.heightProperty());
         wrapper.setClip(clip);
+
+
+
+// Push the entire table down by 20 pixels
+boardAnchor.setTranslateY(-25); 
+// Push the entire table to the right by 10 pixels
+boardAnchor.setTranslateX(0);
+// Nudge the invisible cell grid UP by 5 pixels (relative to the image)
+gridPane.setTranslateY(0);
+// Nudge the invisible cell grid LEFT by 8 pixels
+gridPane.setTranslateX(0);
+// Shift the underlying image down by 10 pixels
+boardImage.setTranslateY(0);
+// Shift the underlying image right by 5 pixels
+boardImage.setTranslateX(0);
     }
  
-    // ────────────────────────────────────────────────────────────────────────
-    //  PUBLIC API  (called by GameView / a controller after each turn)
-    // ────────────────────────────────────────────────────────────────────────
- 
-    /**
-     * Full board refresh – call this once after the Board is initialised
-     * AND after every turn to sync visuals with engine state.
-     *
-     * @param board   the live Board object from the engine
-     * @param player  the current player's Monster
-     * @param opponent the opponent's Monster
-     */
     public void updateBoard(Board board, Monster player, Monster opponent) {
         for (int index = 0; index < 100; index++) {
-            Cell cell = board.getCell(index);             // NOTE: getCell must be made package-visible      -----> i changed it to public im not sure whether i can do that or not, need a fix for this
+            Cell cell = board.getCell(index);             
             int[] rc  = displayRowCol(index);
             CellView cv = cellViews[rc[0]][rc[1]];
             cv.setCell(cell, index);
@@ -75,13 +118,6 @@ public class BoardView {
         updateMonsterTokens(player, opponent);
     }
  
-    /**
-     * Show a floating "+X" or "-X" energy label over a cell, then fade out.
-     * Call this whenever any energy change happens to monsters on the board.
-     *
-     * @param cellIndex board index (0–99) of the affected cell
-     * @param delta     signed energy change (positive = gain, negative = loss)
-     */
     public void showEnergyChange(int cellIndex, int delta) {
         int[] rc = displayRowCol(cellIndex);
         CellView cv = cellViews[rc[0]][rc[1]];
@@ -91,50 +127,39 @@ public class BoardView {
         cv.flashLabel(sign + delta, color);
     }
  
-    /**
-     * Flash a ⛨ shield-block indicator over a cell.
-     * Call when a shield absorbs an energy loss.
-     */
     public void showShieldBlock(int cellIndex) {
         int[] rc = displayRowCol(cellIndex);
         cellViews[rc[0]][rc[1]].flashLabel("⛨ BLOCKED", "#ffe57f");
     }
  
-    /**
-     * Mark a door cell as activated/exhausted visually.
-     *
-     * @param cellIndex board index of the door
-     */
     public void markDoorExhausted(int cellIndex) {
         int[] rc = displayRowCol(cellIndex);
         cellViews[rc[0]][rc[1]].setExhausted(true);
     }
  
-    /** Returns the GridPane so GameView can embed it in the scene. */
-    public StackPane getView() { return wrapper; }  // was: return gridPane
+    public StackPane getView() { return wrapper; }  
  
-    // ────────────────────────────────────────────────────────────────────────
-    //  PRIVATE HELPERS
-    // ────────────────────────────────────────────────────────────────────────
- 
-    /** Build all 100 CellView placeholders and add them to the GridPane. */
     private void buildEmptyGrid() {
         for (int index = 0; index < 100; index++) {
             int[] rc = displayRowCol(index);
-            CellView cv = new CellView(index, CELL_SIZE);
+            // Size doesn't matter here anymore since ColumnConstraints forces the dimensions
+            CellView cv = new CellView(index, 10); 
+            
+            // Make individual CellView panes transparent to see the board beneath them
+            cv.getPane().setStyle("-fx-background-color: transparent;"); 
+            
             cellViews[rc[0]][rc[1]] = cv;
-            gridPane.add(cv.getPane(), rc[1], rc[0]);  // GridPane.add(node, col, row)
+            gridPane.add(cv.getPane(), rc[1], rc[0]);  
         }
     }
  
-    /** Create the two circular monster tokens (not yet placed on the grid). */
     private void initMonsterTokens() {
         playerToken   = makeToken(COLOR_PLAYER_TOKEN);
         opponentToken = makeToken(COLOR_OPPONENT_TOKEN);
     }
  
     private Circle makeToken(String hexColor) {
-        Circle c = new Circle(10);
+        Circle c = new Circle(15); // Slightly larger tokens to fit the scaling layout
         c.setFill(Color.web(hexColor));
         c.setStroke(Color.WHITE);
         c.setStrokeWidth(2);
@@ -142,39 +167,25 @@ public class BoardView {
         return c;
     }
  
-    /**
-     * Move monster tokens to their current board positions.
-     * Removes old tokens from whatever cell they were in, then re-adds them.
-     */
     private void updateMonsterTokens(Monster player, Monster opponent) {
-        // Clear all token overlays first
         for (int r = 0; r < GRID_ROWS; r++)
             for (int c = 0; c < GRID_COLS; c++)
                 cellViews[r][c].clearTokens();
  
-        // Place player token
         int[] pRC = displayRowCol(player.getPosition());
         cellViews[pRC[0]][pRC[1]].addToken(playerToken, "P");
  
-        // Place opponent token
         int[] oRC = displayRowCol(opponent.getPosition());
         cellViews[oRC[0]][oRC[1]].addToken(opponentToken, "O");
     }
  
-    /**
-     * Convert a linear board index (0–99) into [displayRow, displayCol]
-     * for use with JavaFX GridPane.
-     *
-     * Board row 0 (cells 0–9) is shown at the BOTTOM of the grid (GridPane row 9).
-     * Even board-rows go left→right; odd board-rows go right→left.
-     */
     private int[] displayRowCol(int index) {
         int boardRow = index / 10;
         int boardCol = index % 10;
  
-        int displayRow = (GRID_ROWS - 1) - boardRow;          // flip: row 0 = bottom
-        int displayCol = (boardRow % 2 == 0) ? boardCol       // even row: L→R
-                                              : (9 - boardCol); // odd row:  R→L
+        int displayRow = (GRID_ROWS - 1) - boardRow;          
+        int displayCol = (boardRow % 2 == 0) ? boardCol       
+                                              : (9 - boardCol); 
         return new int[]{displayRow, displayCol};
     }
 }
