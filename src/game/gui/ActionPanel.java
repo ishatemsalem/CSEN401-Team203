@@ -5,24 +5,17 @@ import game.engine.cards.Card;
 import game.engine.monsters.Monster;
 import game.engine.exceptions.InvalidMoveException;
 import game.engine.exceptions.OutOfEnergyException;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
 
-/**
- * Left panel: optional power-up (armed before roll, applied when you roll), roll dice,
- * dice readout. Invalid feedback uses {@link ExceptionHandler} toasts (non-blocking).
- */
 public class ActionPanel {
 
-    private VBox    view;
+    private Pane    view;
     private Label   diceResultLabel;
     private Label   hintLabel;
     private Button  rollButton;
     private Button  powerUpButton;
-    /** If true, {@link Game#usePowerup()} runs once at the start of the next roll (before the move). */
     private boolean powerUpActivated  = false;
     private boolean hasRolledThisTurn = false;
 
@@ -49,20 +42,45 @@ public class ActionPanel {
         diceResultLabel.setStyle(
             "-fx-text-fill: white;" +
             "-fx-font-size: 24px;" +
-            "-fx-font-weight: bold;"
+            "-fx-font-weight: bold;" +
+            "-fx-effect: dropshadow(gaussian, black, 4, 0.8, 1, 1);" // Added drop shadow for visibility over board
         );
 
         hintLabel = new Label("Turn power-up ON if you want it, then roll.\nPower-up only applies before the dice move.");
         hintLabel.setWrapText(true);
         hintLabel.setMaxWidth(210);
-        hintLabel.setStyle("-fx-text-fill: #b0bec5; -fx-font-size: 11px;");
+        hintLabel.setStyle(
+            "-fx-text-fill: #b0bec5; " +
+            "-fx-font-size: 11px; " +
+            "-fx-effect: dropshadow(gaussian, black, 2, 0.8, 1, 1);" // Added drop shadow
+        );
 
-        view = new VBox(14, powerUpButton, rollButton, diceResultLabel, hintLabel);
-        view.setAlignment(Pos.CENTER);
-        view.setPadding(new Insets(20, 16, 20, 16));
-        view.setStyle("-fx-background-color: #1a1a2e;");
-        view.setMinWidth(230);
-        view.setPrefWidth(240);
+        view = new Pane();
+        // CRITICAL: Allows clicks to pass through the empty space of this Pane to the board below
+        view.setPickOnBounds(false); 
+        view.getChildren().addAll(powerUpButton, rollButton, diceResultLabel, hintLabel);
+
+        // =========================================================
+        //  POSITION CONTROLS: Move each element independently here
+        // =========================================================
+        
+        // Power-Up Button Position
+        powerUpButton.setLayoutX(20);
+        powerUpButton.setLayoutY(400);
+
+        // Roll Button Position
+        rollButton.setLayoutX(20);
+        rollButton.setLayoutY(450);
+
+        // Dice Result Label Position
+        diceResultLabel.setLayoutX(20);
+        diceResultLabel.setLayoutY(500);
+
+        // Hint Label Position
+        hintLabel.setLayoutX(20);
+        hintLabel.setLayoutY(550);
+        
+        // =========================================================
     }
 
     private void togglePowerUp() {
@@ -91,9 +109,7 @@ public class ActionPanel {
                 hasRolledThisTurn = false;
                 rollButton.setDisable(false);
                 powerUpButton.setDisable(false);
-            } catch (RuntimeException ignored) {
-                // keep UI best-effort; never rethrow from handler
-            }
+            } catch (RuntimeException ignored) {}
         }
     }
 
@@ -184,7 +200,7 @@ public class ActionPanel {
         diceResultLabel.setText("Dice: —");
     }
 
-    public VBox getView() { return view; }
+    public Pane getView() { return view; }
 
     private String buttonStyle(String color) {
         return  "-fx-background-color: " + color + ";" +
@@ -192,6 +208,7 @@ public class ActionPanel {
                 "-fx-font-size: 13px;" +
                 "-fx-font-weight: bold;" +
                 "-fx-background-radius: 6;" +
-                "-fx-cursor: hand;";
+                "-fx-cursor: hand;" +
+                "-fx-effect: dropshadow(gaussian, black, 5, 0.5, 0, 2);"; // Shadow for visibility
     }
 }

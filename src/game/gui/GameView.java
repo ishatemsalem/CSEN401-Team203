@@ -6,10 +6,6 @@ import javafx.geometry.Insets;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 
-/**
- * GameView — full play screen: HUD (top), actions (left), board (center),
- * plus an overlay layer for inline messages (see {@link ExceptionHandler}).
- */
 public class GameView {
 
     private final StackPane layerRoot;
@@ -29,18 +25,15 @@ public class GameView {
         gamePane = new BorderPane();
         gamePane.setStyle("-fx-background-color: transparent;");
 
-        gamePane.setTop(hudPanel.getView());
-        gamePane.setLeft(actionPanel.getView());
+        //gamePane.setTop(hudPanel.getView());
         gamePane.setCenter(boardView.getView());
-        BorderPane.setMargin(boardView.getView(), new Insets(0, 6, 8, 6));
+        //BorderPane.setMargin(boardView.getView(), new Insets(0, 6, 8, 6));
 
-        hudPanel.getView().prefWidthProperty().bind(gamePane.widthProperty());
-
-        actionPanel.getView().setMinWidth(220);
-        actionPanel.getView().setPrefWidth(230);
+        //hudPanel.getView().prefWidthProperty().bind(gamePane.widthProperty());
 
         layerRoot = new StackPane();
-        layerRoot.getChildren().add(gamePane);
+        
+        layerRoot.getChildren().addAll(gamePane, actionPanel.getView(), hudPanel.getView());
         ExceptionHandler.attachToGameLayer(layerRoot);
 
         refreshAll();

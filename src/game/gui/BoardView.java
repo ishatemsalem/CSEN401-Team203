@@ -106,6 +106,11 @@ gridPane.setTranslateX(0);
 boardImage.setTranslateY(0);
 // Shift the underlying image right by 5 pixels
 boardImage.setTranslateX(0);
+
+// Default was 0.9 (90% of screen height). 
+// Change to 0.7 for a smaller table, or 1.0 to fill the height completely.
+boardAnchor.maxHeightProperty().bind(wrapper.heightProperty().multiply(0.7));
+
     }
  
     public void updateBoard(Board board, Monster player, Monster opponent) {

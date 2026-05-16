@@ -38,3 +38,4 @@ bin/
 # Local JavaFX SDK (download from https://openjfx.io/ into tools/) and CLI build output
 tools/javafx-sdk-*/
 out/
+assets/tex/chars/.DS_Store
