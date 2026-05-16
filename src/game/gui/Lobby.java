@@ -45,12 +45,12 @@ public class Lobby {
         this.view = new Pane(); 
 
         // Load SFX once into memory to prevent freezing
-        try {
+        /*try {
             hoverSound = new AudioClip(new File("assets/audio/hover.mp3").toURI().toString());
             clickSound = new AudioClip(new File("assets/audio/click.mp3").toURI().toString());
         } catch (Exception e) {
             System.out.println("SFX files missing, buttons will be silent.");
-        }
+        }*/
 
         // 1. Load Background (Crop to Fill)
         try {
@@ -227,9 +227,9 @@ public class Lobby {
         btn.setOnMouseEntered(e -> {
             btn.setScaleX(1.05);
             btn.setScaleY(1.05);
-            if (sfxOn && hoverSound != null) {
+            /*if (sfxOn && hoverSound != null) {
                 hoverSound.play();
-            }
+            }*/
         });
         btn.setOnMouseExited(e -> {
             btn.setScaleX(1.0);
@@ -239,9 +239,9 @@ public class Lobby {
             btn.setScaleX(0.95);
             btn.setScaleY(0.95);
             colorAdjust.setBrightness(-0.2);
-            if (sfxOn && clickSound != null) {
+            /*if (sfxOn && clickSound != null) {
                 clickSound.play();
-            }
+            }*/
         });
         btn.setOnMouseReleased(e -> {
             btn.setScaleX(1.05); 
