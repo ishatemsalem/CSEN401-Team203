@@ -1,99 +1,119 @@
 package game.gui;
 
 import javafx.animation.PauseTransition;
-import javafx.geometry.Insets;
+import javafx.animation.TranslateTransition;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.geometry.Pos;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
-/**
- * Card drawn on a card cell: name, description, and a short effect / lucky indication.
- */
+import java.io.File;
+
 public class CardDisplay {
 
-    private VBox  view;
-    private Label nameLabel;
-    private Label effectLabel;
-    private Label indicationLabel;
+    // ========================================================================
+    // --- CARD ALIGNMENT & SIZING CONTROLS (%) ---
+    // Change these values to resize or move the deck relative to the screen.
+    // 1.0 = 100%, 0.5 = 50%, 0.15 = 15%, etc.
+    // ========================================================================
+    
+    private static final double CARD_WIDTH_PCT = 0.14;  // Card takes 12% of screen width
+    private static final double CARD_POS_X_PCT = 0.85;  // Deck is placed 85% across the screen (right side)
+    private static final double CARD_POS_Y_PCT = 0.05;  // Deck is placed 5% down from the top
+    private static final double SLIDE_DOWN_PCT = 1.20;  // Animated card slides down 120% of screen height
 
-    public CardDisplay() {
+    // ========================================================================
 
-        Label header = new Label("CARD DRAWN");
-        header.setStyle(
-            "-fx-text-fill: #aaaaaa;" +
-            "-fx-font-size: 10px;" +
-            "-fx-font-weight: bold;"
-        );
+    private StackPane view;
+    private StackPane animatedGroup;
+    private ImageView activeCardImage;
+    private ReadOnlyDoubleProperty screenHeightProp;
 
-        nameLabel = new Label("");
-        nameLabel.setStyle(
-            "-fx-text-fill: #ffe57f;" +
-            "-fx-font-size: 14px;" +
-            "-fx-font-weight: bold;"
-        );
+    public CardDisplay(ReadOnlyDoubleProperty screenWidthProp, ReadOnlyDoubleProperty screenHeightProp) {
+        this.screenHeightProp = screenHeightProp;
 
-        effectLabel = new Label("");
-        effectLabel.setWrapText(true);
-        effectLabel.setMaxWidth(260);
-        effectLabel.setStyle(
-            "-fx-text-fill: #ffffff;" +
-            "-fx-font-size: 11px;"
-        );
+        // 1. Static Deck Image (The top card of the deck)
+        ImageView deckImage = new ImageView();
+        try {
+            deckImage.setImage(new Image(new File("assets/tex/cards/back.png").toURI().toString()));
+        } catch (Exception e) {}
+        deckImage.setPreserveRatio(true);
+        deckImage.fitWidthProperty().bind(screenWidthProp.multiply(CARD_WIDTH_PCT));
 
-        indicationLabel = new Label("");
-        indicationLabel.setWrapText(true);
-        indicationLabel.setMaxWidth(260);
-        indicationLabel.setStyle(
-            "-fx-text-fill: #b0bec5;" +
-            "-fx-font-size: 10px;" +
-            "-fx-font-style: italic;"
-        );
+        // 2. The Animated Card (Starts off matching the deck)
+        activeCardImage = new ImageView();
+        try {
+            activeCardImage.setImage(new Image(new File("assets/tex/cards/back.png").toURI().toString()));
+        } catch (Exception e) {}
+        activeCardImage.setPreserveRatio(true);
+        activeCardImage.fitWidthProperty().bind(screenWidthProp.multiply(CARD_WIDTH_PCT));
 
-        view = new VBox(4, header, nameLabel, effectLabel, indicationLabel);
-        view.setAlignment(Pos.CENTER_LEFT);
-        view.setPadding(new Insets(8, 14, 8, 14));
-        view.setStyle(
-            "-fx-background-color: #2a2a3e;" +
-            "-fx-background-radius: 8;" +
-            "-fx-border-color: #ffe57f;" +
-            "-fx-border-width: 1;" +
-            "-fx-border-radius: 8;"
-        );
-        view.setPrefWidth(280);
-        view.setMinWidth(200);
-        view.setVisible(false);
+        animatedGroup = new StackPane(activeCardImage);
+        animatedGroup.setVisible(false);
+
+        view = new StackPane(deckImage, animatedGroup);
+        view.setAlignment(Pos.TOP_CENTER);
+
+        // Bind the exact position of the entire deck container to screen percentages
+        view.translateXProperty().bind(screenWidthProp.multiply(CARD_POS_X_PCT));
+        view.translateYProperty().bind(screenHeightProp.multiply(CARD_POS_Y_PCT));
     }
 
-    /** @param lucky when {@code true}, shows a “lucky card” hint (from engine {@code Card#isLucky()}). */
-    public void showCard(String cardName, String effect, boolean lucky) {
-        nameLabel.setText(cardName != null ? cardName : "Card");
-        effectLabel.setText(effect != null && !effect.isEmpty() ? effect : "(No description)");
-        if (lucky) {
-            indicationLabel.setText("✦ Lucky card — higher rarity weight in the deck.");
-            indicationLabel.setStyle(
-                "-fx-text-fill: #ffd740;" +
-                "-fx-font-size: 10px;" +
-                "-fx-font-style: italic;"
-            );
-        } else {
-            indicationLabel.setText("Effect applied on landing this cell.");
-            indicationLabel.setStyle(
-                "-fx-text-fill: #90caf9;" +
-                "-fx-font-size: 10px;" +
-                "-fx-font-style: italic;"
-            );
-        }
-        view.setVisible(true);
+    private String getCardImagePath(String name) {
+        if (name == null) return "assets/tex/cards/back.png";
+        String n = name.toLowerCase();
+        if (n.contains("2319") || n.contains("alert")) return "assets/tex/cards/2319_alert.png";
+        if (n.contains("contam")) return "assets/tex/cards/contam_code.png";
+        if (n.contains("mega")) return "assets/tex/cards/mega_drain.png";
+        if (n.contains("mind") || n.contains("scramble")) return "assets/tex/cards/mind_scramble.png";
+        if (n.contains("swap")) return "assets/tex/cards/pos_swap.png";
+        if (n.contains("small") || n.contains("snatch")) return "assets/tex/cards/small_snatch.png";
+        if (n.contains("sneaky") || n.contains("thief")) return "assets/tex/cards/sneaky_thief.png";
+        if (n.contains("shield")) return "assets/tex/cards/super_shield.png";
+        if (n.contains("total") || n.contains("confusion")) return "assets/tex/cards/total_confusion.png";
+        return "assets/tex/cards/back.png";
+    }
 
-        PauseTransition pause = new PauseTransition(Duration.seconds(5));
-        pause.setOnFinished(e -> view.setVisible(false));
-        pause.play();
+    public void showCard(String cardName, String effect, boolean lucky) {
+        try {
+            activeCardImage.setImage(new Image(new File("assets/tex/cards/back.png").toURI().toString()));
+        } catch (Exception e) {}
+        
+        animatedGroup.setTranslateY(0);
+        animatedGroup.setVisible(true);
+
+        // Calculate dynamic slide distance based on current window height
+        double slideDistance = screenHeightProp.get() * SLIDE_DOWN_PCT;
+
+        // 1. Slide face-down card down out of the screen
+        TranslateTransition slideDown = new TranslateTransition(Duration.seconds(0.4), animatedGroup);
+        slideDown.setByY(slideDistance); 
+
+        slideDown.setOnFinished(e -> {
+            // 2. Swap texture to the actual drawn face-up card
+            try {
+                activeCardImage.setImage(new Image(new File(getCardImagePath(cardName)).toURI().toString()));
+            } catch (Exception ex) {}
+
+            // 3. Slide the face-up card back up into view
+            TranslateTransition slideUp = new TranslateTransition(Duration.seconds(0.4), animatedGroup);
+            slideUp.setByY(-slideDistance); 
+            
+            slideUp.setOnFinished(ev -> {
+                PauseTransition pause = new PauseTransition(Duration.seconds(4));
+                pause.setOnFinished(event -> animatedGroup.setVisible(false));
+                pause.play();
+            });
+            slideUp.play();
+        });
+        slideDown.play();
     }
 
     public void hide() {
-        view.setVisible(false);
+        animatedGroup.setVisible(false);
     }
 
-    public VBox getView() { return view; }
+    public StackPane getView() { return view; }
 }

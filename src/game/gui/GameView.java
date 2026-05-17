@@ -2,7 +2,6 @@ package game.gui;
 
 import game.engine.Game;
 import game.engine.monsters.Monster;
-import javafx.geometry.Insets;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 
@@ -25,28 +24,23 @@ public class GameView {
         gamePane = new BorderPane();
         gamePane.setStyle("-fx-background-color: transparent;");
 
-        //gamePane.setTop(hudPanel.getView());
         gamePane.setCenter(boardView.getView());
-        //BorderPane.setMargin(boardView.getView(), new Insets(0, 6, 8, 6));
-
-        //hudPanel.getView().prefWidthProperty().bind(gamePane.widthProperty());
 
         layerRoot = new StackPane();
         
         layerRoot.getChildren().addAll(gamePane, actionPanel.getView(), hudPanel.getView());
         ExceptionHandler.attachToGameLayer(layerRoot);
 
-        refreshAll();
+        // Initial setup instantly
+        refreshAll(true, null);
     }
 
     public void refreshAll() {
-        try {
-            boardView.updateBoard(
-                game.getBoard(),
-                game.getPlayer(),
-                game.getOpponent()
-            );
+        refreshAll(true, null);
+    }
 
+    public void refreshAll(boolean skipAnimation, Runnable onAnimationComplete) {
+        try {
             Monster current = game.getCurrent();
             Monster player = game.getPlayer();
             Monster opponent = game.getOpponent();
@@ -57,10 +51,21 @@ public class GameView {
                 opponent.getName(), opponent.getEnergy(), opponent.getPosition(),
                 game.getLastRoll()
             );
+
+            // Update board triggers the animations and runs the callback when finished
+            boardView.updateBoard(
+                game.getBoard(),
+                player,
+                opponent,
+                skipAnimation,
+                onAnimationComplete
+            );
+
         } catch (RuntimeException ex) {
             ExceptionHandler.showGenericError(
                 "Could not refresh the board or HUD.\n" + ex.getClass().getSimpleName() + ": " + ex.getMessage()
             );
+            if (onAnimationComplete != null) onAnimationComplete.run();
         }
     }
 

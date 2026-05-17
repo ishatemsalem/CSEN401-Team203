@@ -21,30 +21,36 @@ public class HUDPanel {
     private int turnCount = 1;
 
     public HUDPanel() {
+        root = new Pane();
+        root.setPickOnBounds(false); 
+        root.setCache(true);
+        root.setCacheHint(CacheHint.SPEED);
+
         turnLabel = styledLabel("Turn: 1");
 
         playerLabel = styledLabel("▶  Loading...");
         playerLabel.setStyle(
             "-fx-text-fill: #00e5ff;" +
-            "-fx-font-size: 15px;" +
-            "-fx-font-weight: bold;" +
+            "-fx-font-family: 'Jua', sans-serif;" +
+            "-fx-font-size: 16px;" +
             "-fx-effect: dropshadow(gaussian, black, 3, 0.8, 1, 1);"
         );
 
         scoresLabel = styledLabel("You / Opponent —");
         scoresLabel.setStyle(
             "-fx-text-fill: #ffe57f;" +
-            "-fx-font-size: 12px;" +
-            "-fx-font-weight: bold;" +
+            "-fx-font-family: 'Jua', sans-serif;" +
+            "-fx-font-size: 14px;" +
             "-fx-effect: dropshadow(gaussian, black, 3, 0.8, 1, 1);"
         );
 
         lastCardSummary = new Label("Last card drawn: —");
         lastCardSummary.setWrapText(true);
-        lastCardSummary.setMaxWidth(400); // Prevent text from running off-screen
+        lastCardSummary.setMaxWidth(400); 
         lastCardSummary.setStyle(
             "-fx-text-fill: #cfd8dc;" +
-            "-fx-font-size: 11px;" +
+            "-fx-font-family: 'Jua', sans-serif;" +
+            "-fx-font-size: 13px;" +
             "-fx-effect: dropshadow(gaussian, black, 3, 0.8, 1, 1);"
         );
 
@@ -52,32 +58,22 @@ public class HUDPanel {
         freezeLabel.setStyle(
             "-fx-text-fill: white;" +
             "-fx-background-color: #0077b6;" +
-            "-fx-font-size: 13px;" +
-            "-fx-font-weight: bold;" +
+            "-fx-font-family: 'Jua', sans-serif;" +
+            "-fx-font-size: 15px;" +
             "-fx-padding: 6 12 6 12;" +
             "-fx-background-radius: 6;" +
             "-fx-effect: dropshadow(gaussian, black, 4, 0.5, 0, 2);"
         );
         freezeLabel.setVisible(false);
 
-        cardDisplay = new CardDisplay();
-
-        root = new Pane();
-        root.setPickOnBounds(false); // Clicks pass through empty space to the board
-        
-        // FIX FOR START-GAME LAG: Cache the complex text and shadows as a hardware bitmap
-        root.setCache(true);
-        root.setCacheHint(CacheHint.SPEED);
+        // Card Display now takes the window properties to handle its own percentage scaling
+        cardDisplay = new CardDisplay(root.widthProperty(), root.heightProperty());
 
         root.getChildren().addAll(
             turnLabel, playerLabel, scoresLabel, 
             lastCardSummary, freezeLabel, cardDisplay.getView()
         );
 
-        // =========================================================
-        //  POSITION CONTROLS: Move each element independently here
-        // =========================================================
-        
         turnLabel.setLayoutX(20);
         turnLabel.setLayoutY(20);
 
@@ -92,11 +88,6 @@ public class HUDPanel {
 
         freezeLabel.setLayoutX(20);
         freezeLabel.setLayoutY(140);
-
-        cardDisplay.getView().setLayoutX(900);
-        cardDisplay.getView().setLayoutY(20);
-        
-        // =========================================================
     }
 
     public void nextTurn() {
@@ -144,7 +135,7 @@ public class HUDPanel {
 
     public CardDisplay getCardDisplay() { return cardDisplay; }
     public int getTurnCount() { return turnCount; }
-    public Pane getView() { return root; } // Changed return type to Pane
+    public Pane getView() { return root; } 
 
     private static String shorten(String s, int max) {
         if (s == null) return "?";
@@ -153,7 +144,7 @@ public class HUDPanel {
 
     private Label styledLabel(String text) {
         Label l = new Label(text);
-        l.setStyle("-fx-text-fill: #eceff1; -fx-font-size: 14px; -fx-effect: dropshadow(gaussian, black, 3, 0.8, 1, 1);");
+        l.setStyle("-fx-text-fill: #eceff1; -fx-font-family: 'Jua', sans-serif; -fx-font-size: 16px; -fx-effect: dropshadow(gaussian, black, 3, 0.8, 1, 1);");
         return l;
     }
 }

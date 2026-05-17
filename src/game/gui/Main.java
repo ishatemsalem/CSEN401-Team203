@@ -23,52 +23,34 @@ public class Main extends Application {
     private Scene mainScene;
     private StackPane rootLayout;
 
-@Override
+    @Override
     public void start(Stage primaryStage) {
         this.window = primaryStage;
         ExceptionHandler.setAlertOwner(primaryStage);
         this.window.setTitle("DooR DasH: Scare vs Laugh Touchdown");
         
+        // --- LOAD CUSTOM FONT GLOBALLY ---
+        try {
+            javafx.scene.text.Font.loadFont(new File("assets/fonts/Jua-Regular.ttf").toURI().toString(), 14);
+        } catch (Exception e) {
+            System.out.println("Could not load BM Jua font. Make sure the path is correct.");
+        }
+
         rootLayout = new StackPane();
         mainScene = new Scene(rootLayout, 1280, 720);
         
         initAudio("assets/audio/lobby_theme.mp3");
 
-        /* --- COMMENTED OUT FOR DEBUGGING --- *.
-        /* 
-        // Load intro screen first, PASSING IN AUDIO PLAYER
-        StartupScreen intro = new StartupScreen(this::triggerFlashbangTransition, backgroundMusic);
-        rootLayout.getChildren().add(intro.getView());
-        */
-
-        // --- DEBUG OVERRIDE: LOAD DIRECTLY TO LOBBY ---
-        
         switchToLobby();
-        
         
         window.setScene(mainScene);
         window.setMinWidth(1100);
         window.setMinHeight(700);
         window.show();
         
-        // Start the music directly without waiting for the intro sequence
         if (backgroundMusic != null) {
-            /* --- COMMENTED OUT FOR DEBUGGING --- */
-            /*
-            backgroundMusic.setOnPlaying(() -> {
-                // for sync purposes
-                intro.startSequence(); 
-            });
-            */
             backgroundMusic.play();
         } 
-        /* --- COMMENTED OUT FOR DEBUGGING --- */
-        /*
-        else {
-            // justincase the audio file is missing
-            intro.startSequence();
-        }
-        */
     }
 
     private boolean sfxMuted = false;
@@ -88,15 +70,11 @@ public class Main extends Application {
     }
 
     private void triggerFlashbangTransition() {
-        //whitebox
         Rectangle flashOverlay = new Rectangle(1280, 720, Color.WHITE);
-        flashOverlay.setMouseTransparent(true); // mouseclicks pass through
-        
+        flashOverlay.setMouseTransparent(true);
         flashOverlay.setBlendMode(BlendMode.ADD);
-        
         rootLayout.getChildren().add(flashOverlay);
 
-        // Timing
         Duration fadeInTime = Duration.seconds(2.0 / 60.0);
         Duration fadeOutTime = Duration.seconds(53.0 / 60.0);
 
@@ -108,20 +86,13 @@ public class Main extends Application {
         phaseOut.setFromValue(1.0);
         phaseOut.setToValue(0.0);
 
-        // when fully white:
         phaseIn.setOnFinished(e -> {
             switchToLobby();
-            
-            // since switchToLobby() clears everything in rootLayout, put flash overlay on top again
             rootLayout.getChildren().add(flashOverlay);
-            
-            phaseOut.play(); //fadeout
+            phaseOut.play();
         });
 
-        // cleanup
         phaseOut.setOnFinished(e -> rootLayout.getChildren().remove(flashOverlay));
-
-        // Ignite the flash
         phaseIn.play();
     }
 
@@ -129,13 +100,12 @@ public class Main extends Application {
         try {
             Media media = new Media(new File(path).toURI().toString());
             backgroundMusic = new MediaPlayer(media);
-            backgroundMusic.setCycleCount(MediaPlayer.INDEFINITE); // Loop lobby music
+            backgroundMusic.setCycleCount(MediaPlayer.INDEFINITE);
         } catch (Exception e) {
             System.out.println("Audio file not found, running silently.");
         }
     }
 
-    // Callbacks for Scene Switching
     public void switchToLobby() {
         Lobby menu = new Lobby(this);
         rootLayout.getChildren().setAll(menu.getView());
@@ -160,7 +130,6 @@ public class Main extends Application {
         }
     }
 
-    /** Maps lobby combo text to engine {@link Role}. */
     private static Role roleFromLobbyChoice(String selectedSide) {
         if (selectedSide != null && selectedSide.toLowerCase().contains("laugh")) {
             return Role.LAUGHER;
