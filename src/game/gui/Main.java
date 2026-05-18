@@ -127,6 +127,26 @@ public class Main extends Application {
         rootLayout.getChildren().setAll(instructions.getView());
     }
 
+public void switchToCredits() {
+        if (backgroundMusic != null) {
+            backgroundMusic.pause();
+        }
+        
+        Credits credits = new Credits(this);
+        credits.getView().setOpacity(0);
+        
+        // Add credits OVER the current screen, then fade it in
+        rootLayout.getChildren().add(credits.getView());
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), credits.getView());
+        fadeIn.setToValue(1);
+        fadeIn.setOnFinished(e -> {
+            // Once fully black, remove the lobby underneath to save memory
+            rootLayout.getChildren().setAll(credits.getView());
+            credits.startAnimation(); 
+        });
+        fadeIn.play();
+    }
+
     public void startGame(String selectedSide) {
         Role playerRole = roleFromLobbyChoice(selectedSide);
         try {

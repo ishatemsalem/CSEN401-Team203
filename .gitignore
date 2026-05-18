@@ -39,3 +39,5 @@ bin/
 tools/javafx-sdk-*/
 out/
 assets/tex/chars/.DS_Store
+assets/.DS_Store
+assets/tex/.DS_Store

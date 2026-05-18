@@ -93,6 +93,8 @@ public class Lobby {
         applyButtonHoverPress(musicBtn);
         applyButtonHoverPress(sfxBtn);
 
+
+        creditsBtn.setOnMouseClicked(e -> mainApp.switchToCredits());
         instructionsBtn.setOnMouseClicked(e -> mainApp.switchToInstructions());
 
         musicBtn.setOnMouseClicked(e -> toggleAudio(musicBtn, "music"));

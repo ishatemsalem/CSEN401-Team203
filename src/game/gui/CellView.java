@@ -62,13 +62,12 @@ public class CellView {
         root = new StackPane(layout, flashLabel);
         root.setPrefSize(size, size);
 
-        applyStyle();
+        applyStyle(null);
     }
 
     public void setCell(Cell cell, int index) {
         indexLabel.setText(String.valueOf(index));
         
-        // Reset center label defaults
         centreLabel.setText("");
         centreLabel.setStyle(
                 "-fx-text-fill: white;" +
@@ -79,7 +78,7 @@ public class CellView {
         exhausted = false;
 
         if (cell == null) {
-            applyStyle();
+            applyStyle(null);
             return;
         }
 
@@ -102,13 +101,13 @@ public class CellView {
             if (mc.getCellMonster() != null) {                 
                 Monster m = mc.getCellMonster();
                 centreLabel.setText(m.getName());
-                String color = (m.getRole() == Role.SCARER) ? "crimson" : "lightgreen";
-                // Style specifically for the stationed monster's name
+                // Darkened colors for stationed board monsters
+                String color = (m.getRole() == Role.SCARER) ? "#c60000" : "#5bba5b";
                 centreLabel.setStyle("-fx-text-fill: " + color + "; -fx-font-family: 'Jua', sans-serif; -fx-font-size: 13px; -fx-font-weight: bold;");
             }
         }
         
-        applyStyle();
+        applyStyle(cell);
     }
 
     public void setOccupants(Monster player, Monster opponent, int cellIndex) {
@@ -123,8 +122,9 @@ public class CellView {
 
     private Label createMonsterLabel(Monster m) {
         Label l = new Label(m.getName());
-        String bg = (m.getRole() == Role.SCARER) ? "crimson" : "lightgreen";
-        String fg = (m.getRole() == Role.SCARER) ? "white" : "black";
+        // Darkened label backgrounds and text for moving player/opponent tokens
+        String bg = (m.getRole() == Role.SCARER) ? "#c60000" : "#5bba5b"; 
+        String fg = (m.getRole() == Role.SCARER) ? "#dddddd" : "#1a1a1a"; 
         l.setStyle("-fx-background-color: " + bg + "; -fx-text-fill: " + fg + "; -fx-font-family: 'Jua', sans-serif; -fx-font-size: 11px; -fx-padding: 1 4 1 4; -fx-background-radius: 3; -fx-font-weight: bold;");
         return l;
     }
@@ -164,8 +164,14 @@ public class CellView {
 
     public StackPane getPane() { return root; }
 
-    // Renders the background completely transparent so the board image is seen below
-    private void applyStyle() {   
-        layout.setStyle("-fx-background-color: transparent;");
+    private void applyStyle(Cell cell) {
+        String baseBorder = "-fx-border-color: #546e7a; -fx-border-width: 1; -fx-border-radius: 3; -fx-background-radius: 3; ";
+        if (cell instanceof CardCell) {
+            layout.setStyle(baseBorder + "-fx-background-color: rgba(0, 0, 139, 0.4);"); // Dark Blue
+        } else if (cell instanceof MonsterCell) {
+            layout.setStyle(baseBorder + "-fx-background-color: rgba(173, 216, 230, 0.5);"); // Light Blue
+        } else {
+            layout.setStyle(baseBorder + "-fx-background-color: transparent;");
+        }
     }
 }
