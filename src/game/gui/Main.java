@@ -41,6 +41,9 @@ public class Main extends Application {
         
         initAudio("assets/audio/lobby_theme.mp3");
 
+        StartupScreen intro = new StartupScreen(this::triggerFlashbangTransition, backgroundMusic);
+        rootLayout.getChildren().add(intro.getView());
+
         switchToLobby();
         
         window.setScene(mainScene);
@@ -50,7 +53,15 @@ public class Main extends Application {
         
         if (backgroundMusic != null) {
             backgroundMusic.play();
+                backgroundMusic.setOnPlaying(() -> {
+                // for sync purposes
+                //intro.startSequence(); 
+            });
         } 
+                else {
+            // justincase the audio file is missing
+            //intro.startSequence();
+        }
     }
 
     private boolean sfxMuted = false;

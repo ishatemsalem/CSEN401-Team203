@@ -123,7 +123,8 @@ public class ActionPanel {
         boolean skipAnimations = skipAnimBox.isSelected();
 
         if (game.getCurrent().isFrozen()) {
-            gameView.getHUD().showFreezeAndHide();
+            // REMOVED: gameView.getHUD().showFreezeAndHide(); 
+            // The HUD now handles the freeze overlay directly via gameView.refreshAll()
             try {
                 game.playTurn();
             } catch (InvalidMoveException e) {

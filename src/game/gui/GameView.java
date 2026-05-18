@@ -13,9 +13,11 @@ public class GameView {
     private final HUDPanel   hudPanel;
     private final ActionPanel actionPanel;
     private final Game       game;
+    private final Main       mainApp;
 
     public GameView(Game game, Main mainApp) {
         this.game = game;
+        this.mainApp = mainApp;
 
         boardView   = new BoardView();
         hudPanel    = new HUDPanel();
@@ -23,16 +25,35 @@ public class GameView {
 
         gamePane = new BorderPane();
         gamePane.setStyle("-fx-background-color: transparent;");
-
         gamePane.setCenter(boardView.getView());
 
         layerRoot = new StackPane();
-        
         layerRoot.getChildren().addAll(gamePane, actionPanel.getView(), hudPanel.getView());
         ExceptionHandler.attachToGameLayer(layerRoot);
 
-        // Initial setup instantly
+        // -- CHEAT KEYS LOGIC --
+        layerRoot.setFocusTraversable(true);
+        layerRoot.setOnKeyPressed(e -> {
+            if (e.getCode() == javafx.scene.input.KeyCode.W) {
+                game.getPlayer().setPosition(99);
+                refreshAll(true, this::checkWin);
+            } else if (e.getCode() == javafx.scene.input.KeyCode.E) {
+                game.getPlayer().setEnergy(game.getPlayer().getEnergy() + 500);
+                refreshAll(true, this::checkWin);
+            }
+        });
+
+        // Request focus so key events are caught immediately
+        javafx.application.Platform.runLater(layerRoot::requestFocus);
+
         refreshAll(true, null);
+    }
+
+    private void checkWin() {
+        Monster winner = game.getWinner();
+        if (winner != null) {
+            mainApp.showWinScreen(winner.getName(), winner.getRole().toString(), winner.getEnergy());
+        }
     }
 
     public void refreshAll() {
@@ -44,15 +65,9 @@ public class GameView {
             Monster current = game.getCurrent();
             Monster player = game.getPlayer();
             Monster opponent = game.getOpponent();
-            hudPanel.setTurnContext(current, player, opponent);
-            hudPanel.setFrozen(current.isFrozen());
-            hudPanel.setScores(
-                player.getName(), player.getEnergy(), player.getPosition(),
-                opponent.getName(), opponent.getEnergy(), opponent.getPosition(),
-                game.getLastRoll()
-            );
+            
+            hudPanel.updateInfo(current, player, opponent, game.getLastRoll());
 
-            // Update board triggers the animations and runs the callback when finished
             boardView.updateBoard(
                 game.getBoard(),
                 player,

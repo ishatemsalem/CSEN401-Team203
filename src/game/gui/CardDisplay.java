@@ -21,7 +21,7 @@ public class CardDisplay {
     
     private static final double CARD_WIDTH_PCT = 0.14;  // Card takes 12% of screen width
     private static final double CARD_POS_X_PCT = 0.85;  // Deck is placed 85% across the screen (right side)
-    private static final double CARD_POS_Y_PCT = 0.05;  // Deck is placed 5% down from the top
+    private static final double CARD_POS_Y_PCT = 0.15;  // Deck is placed 5% down from the top
     private static final double SLIDE_DOWN_PCT = 1.20;  // Animated card slides down 120% of screen height
 
     // ========================================================================
