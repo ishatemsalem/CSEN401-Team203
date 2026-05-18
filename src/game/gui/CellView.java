@@ -110,22 +110,35 @@ public class CellView {
         applyStyle(cell);
     }
 
-    public void setOccupants(Monster player, Monster opponent, int cellIndex) {
+public void setOccupants(Monster player, Monster opponent, int cellIndex) {
         occupantsBox.getChildren().clear();
+        boolean isConfusedHere = false;
+
         if (player != null && player.getPosition() == cellIndex) {
             occupantsBox.getChildren().add(createMonsterLabel(player));
+            if (player.isConfused()) isConfusedHere = true;
         }
         if (opponent != null && opponent.getPosition() == cellIndex) {
             occupantsBox.getChildren().add(createMonsterLabel(opponent));
+            if (opponent.isConfused()) isConfusedHere = true;
+        }
+
+        // Apply light red background if any stationed occupant is confused
+        if (isConfusedHere) {
+            // Appends to the base style applied by setCell()
+            layout.setStyle(layout.getStyle() + "-fx-background-color: rgba(255, 100, 100, 0.4);");
         }
     }
 
     private Label createMonsterLabel(Monster m) {
         Label l = new Label(m.getName());
-        // Darkened label backgrounds and text for moving player/opponent tokens
         String bg = (m.getRole() == Role.SCARER) ? "#c60000" : "#5bba5b"; 
         String fg = (m.getRole() == Role.SCARER) ? "#dddddd" : "#1a1a1a"; 
-        l.setStyle("-fx-background-color: " + bg + "; -fx-text-fill: " + fg + "; -fx-font-family: 'Jua', sans-serif; -fx-font-size: 11px; -fx-padding: 1 4 1 4; -fx-background-radius: 3; -fx-font-weight: bold;");
+        
+        // Add vivid blue outline if frozen
+        String border = m.isFrozen() ? "-fx-border-color: #00bfff; -fx-border-width: 2; -fx-border-radius: 3; " : "";
+        
+        l.setStyle("-fx-background-color: " + bg + "; -fx-text-fill: " + fg + "; -fx-font-family: 'Jua', sans-serif; -fx-font-size: 11px; -fx-padding: 1 4 1 4; -fx-background-radius: 3; -fx-font-weight: bold; " + border);
         return l;
     }
 

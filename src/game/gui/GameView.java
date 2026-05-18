@@ -31,7 +31,7 @@ public class GameView {
         layerRoot.getChildren().addAll(gamePane, actionPanel.getView(), hudPanel.getView());
         ExceptionHandler.attachToGameLayer(layerRoot);
 
-        // -- CHEAT KEYS LOGIC --
+        // CHEAT KYEYS
         layerRoot.setFocusTraversable(true);
         layerRoot.setOnKeyPressed(e -> {
             if (e.getCode() == javafx.scene.input.KeyCode.W) {
