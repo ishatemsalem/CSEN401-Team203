@@ -44,7 +44,7 @@ public class Main extends Application {
         StartupScreen intro = new StartupScreen(this::triggerFlashbangTransition, backgroundMusic);
         rootLayout.getChildren().add(intro.getView());
 
-        //switchToLobby();
+        switchToLobby();
         
         window.setScene(mainScene);
         window.setMinWidth(1100);
@@ -55,12 +55,12 @@ public class Main extends Application {
             backgroundMusic.play();
                 backgroundMusic.setOnPlaying(() -> {
                 // for sync purposes
-                intro.startSequence(); 
+                //intro.startSequence(); 
             });
         } 
                 else {
             // justincase the audio file is missing
-            intro.startSequence();
+            //intro.startSequence();
         }
     }
 
