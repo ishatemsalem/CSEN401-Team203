@@ -122,8 +122,8 @@ public class BoardView {
         int[] rc = displayRowCol(index);
         GridPane.setRowIndex(piece, rc[0]);
         GridPane.setColumnIndex(piece, rc[1]);
-        GridPane.setHalignment(piece, isPlayer ? javafx.geometry.HPos.LEFT : javafx.geometry.HPos.RIGHT);
-        GridPane.setValignment(piece, javafx.geometry.VPos.BOTTOM);
+        GridPane.setHalignment(piece, javafx.geometry.HPos.CENTER);
+        GridPane.setValignment(piece, javafx.geometry.VPos.CENTER);
     }
 
     public void updateBoard(Board board, Monster player, Monster opponent, boolean skipAnimation, Runnable onFinish) {
