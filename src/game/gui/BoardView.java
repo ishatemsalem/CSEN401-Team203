@@ -19,7 +19,7 @@ public class BoardView {
 
     private static final double OVERALL_BOARD_HEIGHT_PCT = 0.8; 
     private static final double ENTIRE_BOARD_OFFSET_X    = 0.0;  
-    private static final double ENTIRE_BOARD_OFFSET_Y    = -0.03; 
+    private static final double ENTIRE_BOARD_OFFSET_Y = 0.01;
     
     private static final double IMAGE_SCALE_PCT      = 1.08;  
     private static final double IMAGE_OFFSET_X_PCT   = 0.0;  
