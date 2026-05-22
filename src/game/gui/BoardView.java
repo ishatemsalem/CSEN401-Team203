@@ -4,11 +4,13 @@ import game.engine.Board;
 import game.engine.cells.*;
 import game.engine.monsters.Monster;
 import javafx.animation.PauseTransition;
+import javafx.animation.SequentialTransition;
 import javafx.geometry.Pos;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.media.AudioClip;
 import javafx.util.Duration;
 
 import java.io.File;
@@ -35,6 +37,11 @@ public class BoardView {
     private final StackPane boardAnchor; 
     private final GridPane gridPane;
     private final CellView[][] cellViews = new CellView[GRID_ROWS][GRID_COLS];
+    
+    private ImageView playerPiece;
+    private ImageView opponentPiece;
+    private Monster cachedPlayer;
+    private Monster cachedOpponent;
  
     public BoardView() {
         wrapper = new StackPane();
@@ -95,7 +102,38 @@ public class BoardView {
         wrapper.setClip(clip);
     }
  
+    public void initPieces(Monster p, Monster o) {
+        if (playerPiece == null) {
+            cachedPlayer = p;
+            cachedOpponent = o;
+            playerPiece = CellView.createMonsterImage(p);
+            opponentPiece = CellView.createMonsterImage(o);
+            
+            gridPane.getChildren().addAll(playerPiece, opponentPiece);
+        }
+    }
+
+    public ImageView getPieceFor(Monster m) {
+        if (m == cachedPlayer) return playerPiece;
+        return opponentPiece;
+    }
+
+    public void movePieceTo(int index, ImageView piece, boolean isPlayer) {
+        int[] rc = displayRowCol(index);
+        GridPane.setRowIndex(piece, rc[0]);
+        GridPane.setColumnIndex(piece, rc[1]);
+        GridPane.setHalignment(piece, isPlayer ? javafx.geometry.HPos.LEFT : javafx.geometry.HPos.RIGHT);
+        GridPane.setValignment(piece, javafx.geometry.VPos.BOTTOM);
+    }
+
     public void updateBoard(Board board, Monster player, Monster opponent, boolean skipAnimation, Runnable onFinish) {
+        initPieces(player, opponent);
+
+        playerPiece.setImage(CellView.createMonsterImage(player).getImage());
+        opponentPiece.setImage(CellView.createMonsterImage(opponent).getImage());
+        playerPiece.setStyle(player.isFrozen() ? "-fx-effect: dropshadow(gaussian, #00bfff, 8, 1.0, 0, 0);" : "");
+        opponentPiece.setStyle(opponent.isFrozen() ? "-fx-effect: dropshadow(gaussian, #00bfff, 8, 1.0, 0, 0);" : "");
+
         for (int index = 0; index < 100; index++) {
             Cell cell = board.getCell(index);             
             int[] rc  = displayRowCol(index);
@@ -103,16 +141,75 @@ public class BoardView {
             cellViews[rc[0]][rc[1]].setOccupants(player, opponent, index);
         }
         
+        movePieceTo(player.getPosition(), playerPiece, true);
+        movePieceTo(opponent.getPosition(), opponentPiece, false);
+
         if (skipAnimation) {
             if (onFinish != null) onFinish.run();
         } else {
-            // Replaces the volatile PathTransition with a reliable pause buffer to prevent instant turn snapping
             PauseTransition pt = new PauseTransition(Duration.seconds(0.3));
             pt.setOnFinished(e -> {
                 if (onFinish != null) onFinish.run();
             });
             pt.play();
         }
+    }
+
+    public void animateTurn(int startPos, int roll, int intermediatePos, int endPos, Monster activeMonster, Runnable onFinish) {
+        ImageView piece = getPieceFor(activeMonster);
+        boolean isPlayer = (activeMonster == cachedPlayer);
+        
+        movePieceTo(startPos, piece, isPlayer);
+
+        AudioClip bopDuring = null;
+        AudioClip bopEnd = null;
+        try {
+            bopDuring = new AudioClip(new File("assets/audio/bop_during.mp3").toURI().toString());
+            bopEnd = new AudioClip(new File("assets/audio/bop_end.mp3").toURI().toString());
+        } catch (Exception e) {
+            System.out.println("Error loading audio clips:");
+            e.printStackTrace();
+        }
+
+        final AudioClip finalBopDuring = bopDuring;
+        final AudioClip finalBopEnd = bopEnd;
+
+        SequentialTransition seq = new SequentialTransition();
+
+        int steps = roll;
+        for (int i = 1; i <= steps; i++) {
+            final int nextPos = (startPos + i) % 100;
+            final boolean isLastHop = (i == steps);
+            
+            PauseTransition moveAction = new PauseTransition(Duration.millis(1));
+            moveAction.setOnFinished(e -> {
+                movePieceTo(nextPos, piece, isPlayer);
+                if (isLastHop && finalBopEnd != null) finalBopEnd.play();
+                else if (!isLastHop && finalBopDuring != null) finalBopDuring.play();
+            });
+
+            javafx.animation.TranslateTransition jumpAnim = new javafx.animation.TranslateTransition(Duration.millis(100), piece);
+            jumpAnim.setFromY(0);
+            jumpAnim.setToY(-30);
+            jumpAnim.setCycleCount(2);
+            jumpAnim.setAutoReverse(true);
+
+            seq.getChildren().addAll(moveAction, jumpAnim);
+        }
+
+        if (intermediatePos != endPos) {
+            PauseTransition transportPause = new PauseTransition(Duration.millis(500));
+            transportPause.setOnFinished(e -> {
+                movePieceTo(endPos, piece, isPlayer);
+            });
+            seq.getChildren().add(transportPause);
+        }
+
+        seq.setOnFinished(e -> {
+            if (onFinish != null) onFinish.run();
+        });
+
+        seq.play();
     }
  
     private void buildEmptyGrid() {

@@ -159,9 +159,16 @@ public class ActionPanel {
         rollButton.setDisable(true);
         powerUpButton.setDisable(true);
 
+        Monster activeMonster = game.getCurrent();
+        int startPos = activeMonster.getPosition();
+
         try {
             game.playTurn();
-            diceResultLabel.setText("Dice: " + game.getLastRoll());
+            int roll = game.getLastRoll();
+            int intermediatePos = (startPos + roll) % 100;
+            int endPos = activeMonster.getPosition();
+
+            diceResultLabel.setText("Dice: " + roll);
 
             Card drawn = game.getLastDrawnCard();
             if (drawn != null) {
@@ -172,27 +179,31 @@ public class ActionPanel {
                 );
                 gameView.getHUD().setLastCardSummary(drawn.getName(), drawn.getDescription());
             }
+
+            Runnable onFinish = () -> {
+                gameView.getHUD().nextTurn();
+                Monster winner = game.getWinner();
+                if (winner != null) {
+                    mainApp.showWinScreen(
+                        winner.getName(),
+                        winner.getRole().toString(),
+                        winner.getEnergy()
+                    );
+                    return;
+                }
+                resetForNewTurn();
+            };
+
+            if (!skipAnimations) {
+                gameView.animateAndRefreshTurn(startPos, roll, intermediatePos, endPos, activeMonster, onFinish);
+            } else {
+                gameView.refreshAll(true, onFinish);
+            }
         } catch (InvalidMoveException e) {
             ExceptionHandler.showInvalidMove(e.getMessage());
             resetForNewTurn();
             return;
         }
-
-        // Apply visual updates with bobbing animation. 
-        // When the animation is FULLY COMPLETE, reset the UI and next turn.
-        gameView.refreshAll(skipAnimations, () -> {
-            gameView.getHUD().nextTurn();
-            Monster winner = game.getWinner();
-            if (winner != null) {
-                mainApp.showWinScreen(
-                    winner.getName(),
-                    winner.getRole().toString(),
-                    winner.getEnergy()
-                );
-                return;
-            }
-            resetForNewTurn();
-        });
     }
 
     public void resetForNewTurn() {

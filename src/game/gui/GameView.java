@@ -60,6 +60,24 @@ public class GameView {
         refreshAll(true, null);
     }
 
+    public void animateAndRefreshTurn(int startPos, int roll, int intermediatePos, int endPos, Monster activeMonster, Runnable onAnimationComplete) {
+        try {
+            // First, temporarily snap the piece back to startPos so it can be animated
+            boardView.movePieceTo(startPos, boardView.getPieceFor(activeMonster), activeMonster == game.getPlayer());
+            
+            // Then trigger the animation
+            boardView.animateTurn(startPos, roll, intermediatePos, endPos, activeMonster, () -> {
+                // After animation is complete, fully refresh the board and HUD
+                refreshAll(true, onAnimationComplete);
+            });
+        } catch (RuntimeException ex) {
+            ExceptionHandler.showGenericError(
+                "Could not animate turn.\n" + ex.getClass().getSimpleName() + ": " + ex.getMessage()
+            );
+            if (onAnimationComplete != null) onAnimationComplete.run();
+        }
+    }
+
     public void refreshAll(boolean skipAnimation, Runnable onAnimationComplete) {
         try {
             Monster current = game.getCurrent();

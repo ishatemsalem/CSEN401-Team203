@@ -101,8 +101,17 @@ public class Board {
 
 	    for (int i = 0; i < stationedMonsters.size(); i++) {
 	        Monster monster = stationedMonsters.get(i);
-	        monster.setPosition(Constants.MONSTER_CELL_INDICES[i]);
-	        setCell(Constants.MONSTER_CELL_INDICES[i], new MonsterCell(monster.getName(), monster));
+	        
+	        int pos = 88; // Default for Sulley/James
+	        String n = monster.getName();
+	        if (n.contains("Randall")) pos = 2;
+	        else if (n.contains("Yeti")) pos = 18;
+	        else if (n.contains("Celia")) pos = 34;
+	        else if (n.contains("Fungus")) pos = 54;
+	        else if (n.contains("Mike")) pos = 82;
+	        
+	        monster.setPosition(pos);
+	        setCell(pos, new MonsterCell(monster.getName(), monster));
 	    }
 	}
 	
