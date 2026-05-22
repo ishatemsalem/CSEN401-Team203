@@ -31,14 +31,70 @@ public class ActionPanel {
         this.game     = game;
         this.mainApp  = mainApp;
 
-        powerUpButton = new Button("Activate Power-Up (optional)");
-        powerUpButton.setPrefWidth(210);
-        powerUpButton.setStyle(buttonStyle("#6a1b9a"));
+        // Initialize with text overlaying the wooden plank part
+        powerUpButton = new Button("Activate Power-Up");
+        powerUpButton.setPrefSize(420, 90); 
+
+        // Load your new custom image asset using relative project locations safely
+        String powerUpImagePath = new java.io.File("assets/buttons/powerup_button.png").toURI().toString();
+
+        // Apply JavaFX styles using your new image background
+        powerUpButton.setStyle(
+            "-fx-background-color: transparent;" +
+            "-fx-background-image: url('" + powerUpImagePath + "');" + 
+            "-fx-background-size: 100% 100%;" +
+            "-fx-background-repeat: no-repeat;" +
+            "-fx-background-position: center;" +
+            "-fx-font-family: 'Jua';" +
+            "-fx-font-size: 24px;" + 
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: #3B2414;" + // Your matching dark brown text color
+            "-fx-cursor: hand;" +
+            "-fx-padding: 0 0 0 100;"   // Shifts text to the right so it doesn't overlap the "Optional" paper flap
+        );
+
+        // Click compression animations
+        powerUpButton.setOnMousePressed(e -> {
+            powerUpButton.setScaleX(0.95);
+            powerUpButton.setScaleY(0.95);
+        });
+
+        powerUpButton.setOnMouseReleased(e -> {
+            powerUpButton.setScaleX(1.0);
+            powerUpButton.setScaleY(1.0);
+        });
         powerUpButton.setOnAction(e -> togglePowerUp());
 
-        rollButton = new Button("Roll dice");
-        rollButton.setPrefWidth(210);
-        rollButton.setStyle(buttonStyle("#1565c0"));
+        rollButton = new Button("ROLL DICE");
+        rollButton.setPrefSize(260, 90);
+        String imagePath = new java.io.File("assets/buttons/button_base.png").toURI().toString();
+        
+        // Apply the styles
+        rollButton.setStyle(
+            "-fx-background-color: transparent;" +
+            "-fx-background-image: url('" + imagePath + "');" + 
+            "-fx-background-size: 100% 100%;" +
+            "-fx-background-repeat: no-repeat;" +
+            "-fx-background-position: center;" +
+            "-fx-font-family: 'Jua';" +
+            "-fx-font-size: 26px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: #3B2414;" + 
+            "-fx-cursor: hand;" +
+            "-fx-padding: 0;" 
+        );
+
+        // Press and release animations
+        rollButton.setOnMousePressed(e -> {
+            rollButton.setScaleX(0.95);
+            rollButton.setScaleY(0.95);
+        });
+
+        rollButton.setOnMouseReleased(e -> {
+            rollButton.setScaleX(1.0);
+            rollButton.setScaleY(1.0);
+        });
+
         rollButton.setOnAction(e -> onRollDice());
 
         diceResultLabel = new Label("Dice: —");
@@ -90,24 +146,51 @@ public class ActionPanel {
 
     private void togglePowerUp() {
         if (gameView.getHUD().getCardDisplay().isWaitingForDraw()) {
-            return; // Safety block if clicking background
+            return; 
         }
         if (hasRolledThisTurn) {
             ExceptionHandler.showInvalidPowerUp();
             return;
         }
+        
         powerUpActivated = !powerUpActivated;
+        
+        String powerUpImagePath = new java.io.File("assets/buttons/powerup_button.png").toURI().toString();
+        
         if (powerUpActivated) {
-            powerUpButton.setText("Power-up: ON (uses when you roll)");
-            powerUpButton.setStyle(buttonStyle("#2e7d32"));
+            powerUpButton.setText("Power-Up: ON");
+            powerUpButton.setStyle(
+                "-fx-background-color: transparent;" +
+                "-fx-background-image: url('" + powerUpImagePath + "');" + 
+                "-fx-background-size: 100% 100%;" +
+                "-fx-background-repeat: no-repeat;" +
+                "-fx-background-position: center;" +
+                "-fx-font-family: 'Jua';" +
+                "-fx-font-size: 24px;" + 
+                "-fx-font-weight: bold;" +
+                "-fx-text-fill: #1b5e20;" + // Dark forest green text color
+                "-fx-cursor: hand;" +
+                "-fx-padding: 0 0 0 100;"
+            );
         } else {
-            powerUpButton.setText("Activate Power-Up (optional)");
-            powerUpButton.setStyle(buttonStyle("#6a1b9a"));
+            powerUpButton.setText("Activate Power-Up");
+            powerUpButton.setStyle(
+                "-fx-background-color: transparent;" +
+                "-fx-background-image: url('" + powerUpImagePath + "');" + 
+                "-fx-background-size: 100% 100%;" +
+                "-fx-background-repeat: no-repeat;" +
+                "-fx-background-position: center;" +
+                "-fx-font-family: 'Jua';" +
+                "-fx-font-size: 24px;" + 
+                "-fx-font-weight: bold;" +
+                "-fx-text-fill: #3B2414;" + // Default brown text color
+                "-fx-cursor: hand;" +
+                "-fx-padding: 0 0 0 100;"
+            );
         }
     }
 
     private void onRollDice() {
-        // Enforce input guard blocks if the player is currently forced to draw a card
         if (gameView.getHUD().getCardDisplay().isWaitingForDraw()) {
             ExceptionHandler.showInvalidAction("You must pick a card by pressing on the deck first!");
             return;
@@ -176,7 +259,6 @@ public class ActionPanel {
 
             Card drawn = game.getLastDrawnCard();
 
-            // Core Completion Finalization block logic wrapper
             Runnable finaliseTurnProcess = () -> {
                 gameView.getHUD().nextTurn();
                 Monster winner = game.getWinner();
@@ -191,16 +273,11 @@ public class ActionPanel {
                 resetForNewTurn();
             };
 
-            // Execution sequence paths branching on if a card draw event exists
             Runnable onFinishedMovementHop = () -> {
                 if (drawn != null) {
-                    // Update text readouts instantly
                     gameView.getHUD().setLastCardSummary(drawn.getName(), drawn.getDescription());
-                    
-                    // Force state pause context, lock actions, and wait for active deck click interaction
                     gameView.getHUD().getCardDisplay().prepareDeckForDraw(drawn.getName(), finaliseTurnProcess);
                 } else {
-                    // No card drawn? Proceed immediately to turn handover
                     finaliseTurnProcess.run();
                 }
             };
@@ -221,9 +298,24 @@ public class ActionPanel {
         powerUpActivated  = false;
         rollButton.setDisable(false);
         powerUpButton.setDisable(false);
-        rollButton.setText("Roll dice");
+        rollButton.setText("ROLL DICE");
         powerUpButton.setText("Activate Power-Up (optional)");
-        powerUpButton.setStyle(buttonStyle("#6a1b9a"));
+        
+        // Maintain image backing when resetting state
+        String powerUpImagePath = new java.io.File("assets/buttons/powerup_base.png").toURI().toString();
+        powerUpButton.setStyle(
+            "-fx-background-color: transparent;" +
+            "-fx-background-image: url('" + powerUpImagePath + "');" + 
+            "-fx-background-size: 100% 100%;" +
+            "-fx-background-repeat: no-repeat;" +
+            "-fx-background-position: center;" +
+            "-fx-font-family: 'Jua';" +
+            "-fx-font-size: 24px;" + 
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: #3B2414;" + 
+            "-fx-cursor: hand;" +
+            "-fx-padding: 0 0 0 100;"
+        );
         diceResultLabel.setText("Dice: —");
     }
 
