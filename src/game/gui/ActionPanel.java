@@ -89,6 +89,9 @@ public class ActionPanel {
     }
 
     private void togglePowerUp() {
+        if (gameView.getHUD().getCardDisplay().isWaitingForDraw()) {
+            return; // Safety block if clicking background
+        }
         if (hasRolledThisTurn) {
             ExceptionHandler.showInvalidPowerUp();
             return;
@@ -104,6 +107,11 @@ public class ActionPanel {
     }
 
     private void onRollDice() {
+        // Enforce input guard blocks if the player is currently forced to draw a card
+        if (gameView.getHUD().getCardDisplay().isWaitingForDraw()) {
+            ExceptionHandler.showInvalidAction("You must pick a card by pressing on the deck first!");
+            return;
+        }
         try {
             onRollDiceImpl();
         } catch (RuntimeException ex) {
@@ -123,8 +131,6 @@ public class ActionPanel {
         boolean skipAnimations = skipAnimBox.isSelected();
 
         if (game.getCurrent().isFrozen()) {
-            // REMOVED: gameView.getHUD().showFreezeAndHide(); 
-            // The HUD now handles the freeze overlay directly via gameView.refreshAll()
             try {
                 game.playTurn();
             } catch (InvalidMoveException e) {
@@ -132,7 +138,6 @@ public class ActionPanel {
             }
             diceResultLabel.setText("Dice: — (frozen)");
             
-            // Sync freeze with board instantly
             gameView.refreshAll(skipAnimations, () -> {
                 gameView.getHUD().nextTurn();
                 resetForNewTurn();
@@ -151,7 +156,6 @@ public class ActionPanel {
                 return;
             }
             powerUpActivated = false;
-            // Power-ups hit instantly before roll, refresh instantly (skip animation)
             gameView.refreshAll(true, null);
         }
 
@@ -171,16 +175,9 @@ public class ActionPanel {
             diceResultLabel.setText("Dice: " + roll);
 
             Card drawn = game.getLastDrawnCard();
-            if (drawn != null) {
-                gameView.getHUD().getCardDisplay().showCard(
-                    drawn.getName(),
-                    drawn.getDescription(),
-                    drawn.isLucky()
-                );
-                gameView.getHUD().setLastCardSummary(drawn.getName(), drawn.getDescription());
-            }
 
-            Runnable onFinish = () -> {
+            // Core Completion Finalization block logic wrapper
+            Runnable finaliseTurnProcess = () -> {
                 gameView.getHUD().nextTurn();
                 Monster winner = game.getWinner();
                 if (winner != null) {
@@ -194,15 +191,28 @@ public class ActionPanel {
                 resetForNewTurn();
             };
 
+            // Execution sequence paths branching on if a card draw event exists
+            Runnable onFinishedMovementHop = () -> {
+                if (drawn != null) {
+                    // Update text readouts instantly
+                    gameView.getHUD().setLastCardSummary(drawn.getName(), drawn.getDescription());
+                    
+                    // Force state pause context, lock actions, and wait for active deck click interaction
+                    gameView.getHUD().getCardDisplay().prepareDeckForDraw(drawn.getName(), finaliseTurnProcess);
+                } else {
+                    // No card drawn? Proceed immediately to turn handover
+                    finaliseTurnProcess.run();
+                }
+            };
+
             if (!skipAnimations) {
-                gameView.animateAndRefreshTurn(startPos, roll, intermediatePos, endPos, activeMonster, onFinish);
+                gameView.animateAndRefreshTurn(startPos, roll, intermediatePos, endPos, activeMonster, onFinishedMovementHop);
             } else {
-                gameView.refreshAll(true, onFinish);
+                gameView.refreshAll(true, onFinishedMovementHop);
             }
         } catch (InvalidMoveException e) {
             ExceptionHandler.showInvalidMove(e.getMessage());
             resetForNewTurn();
-            return;
         }
     }
 

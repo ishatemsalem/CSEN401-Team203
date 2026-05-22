@@ -112,11 +112,18 @@ public final class ExceptionHandler {
         Label line = new Label(full);
         line.setWrapText(true);
         line.setMaxWidth(400);
-        String bg = switch (kind) {
-            case "error" -> "#8b0000";
-            case "info" -> "#1565c0";
-            default -> "#bf6f00";
-        };
+        String bg;
+        switch (kind) {
+            case "error":
+                bg = "#8b0000";
+                break;
+            case "info":
+                bg = "#1565c0";
+                break;
+            default:
+                bg = "#bf6f00";
+                break;
+        }
         line.setStyle(
             "-fx-text-fill: #ffffff;" +
             "-fx-padding: 10 14;" +
