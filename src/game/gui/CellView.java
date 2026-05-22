@@ -184,7 +184,7 @@ public void setOccupants(Monster player, Monster opponent, int cellIndex) {
     public StackPane getPane() { return root; }
 
     private void applyStyle(Cell cell) {
-        String baseBorder = "-fx-border-color: #546e7a; -fx-border-width: 1; -fx-border-radius: 3; -fx-background-radius: 3; ";
+        String baseBorder = "-fx-border-color: transparent; -fx-border-width: 1; -fx-background-radius: 3; ";
         if (cell instanceof CardCell) {
             layout.setStyle(baseBorder + "-fx-background-color: rgba(0, 0, 139, 0.4);"); // Dark Blue
         } else if (cell instanceof MonsterCell) {
