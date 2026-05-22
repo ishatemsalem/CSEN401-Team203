@@ -42,11 +42,11 @@ public class StartupScreen {
     };
     
     private final String[] script = {
-        "Disney,\n\n\n", "Disney,\n\n\n", "Disney,\n\n\n", 
-        "Disney,\nKindly,\n\n", "Disney,\nKindly, don't\n\n", "Disney,\nKindly, don't sue\n\n", 
-        "Disney,\nKindly, don't sue\n We\n", "Disney,\nKindly, don't sue\n We are\n", 
-        "Disney,\nKindly, don't sue\n We are broke.\n", "Disney,\nKindly, don't sue\n We are broke.\nThank", 
-        "Disney,\nKindly, don't sue\n We are broke.\nThank you.", "Disney,\nKindly, don't sue\n We are broke.\nThank you. xoxo", 
+        "Disney,\n\n\n", "I mean\n\n\n", "Pixar,\n\n\n", 
+        "Pixar,\nKindly,\n\n", "Pixar,\nKindly, don't\n\n", "Pixar,\nKindly, don't sue\n\n", 
+        "Pixar,\nKindly, don't sue\n We\n", "Pixar,\nKindly, don't sue\n We are\n", 
+        "Pixar,\nKindly, don't sue\n We are broke.\n", "Pixar,\nKindly, don't sue\n We are broke.\nThank", 
+        "Pixar,\nKindly, don't sue\n We are broke.\nThank you.", "Pixar,\nKindly, don't sue\n We are broke.\nThank you. xoxo", 
         "", 
         "Game\n\n\n\n", "Game by:\n\n\n\n", "Game by:\nIslam\n\n\n", 
         "Game by:\nIslam\nJana\n\n", "Game by:\nIslam\nJana\nJudy\n", "Game by:\nIslam\nJana\nJudy\nRokaya", 
