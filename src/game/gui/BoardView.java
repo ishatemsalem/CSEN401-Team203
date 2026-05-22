@@ -178,7 +178,7 @@ public class BoardView {
 
         int steps = roll;
         for (int i = 1; i <= steps; i++) {
-            final int nextPos = (startPos + i) % 100;
+            final int nextPos = Math.min(startPos + i, 99);
             final boolean isLastHop = (i == steps);
             
             PauseTransition moveAction = new PauseTransition(Duration.millis(1));
@@ -193,6 +193,7 @@ public class BoardView {
             jumpAnim.setToY(-30);
             jumpAnim.setCycleCount(2);
             jumpAnim.setAutoReverse(true);
+            jumpAnim.setOnFinished(e -> piece.setTranslateY(0));
 
             seq.getChildren().addAll(moveAction, jumpAnim);
         }
